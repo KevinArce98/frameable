@@ -1,0 +1,58 @@
+{
+  "name": "@frameable/react",
+  "version": "0.1.0",
+  "description": "Headless React hooks for dragging, resizing and rotating frames on a 2D surface",
+  "type": "module",
+  "sideEffects": false,
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsup src/index.ts --format esm,cjs --dts --clean --external react --external @frameable/core",
+    "test": "vitest run --passWithNoTests",
+    "typecheck": "tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "@frameable/core": "workspace:*"
+  },
+  "peerDependencies": {
+    "react": ">=18"
+  },
+  "devDependencies": {
+    "@types/react": "^19.1.12",
+    "react": "^19.1.1",
+    "tsup": "^8.5.0",
+    "typescript": "^5.9.2",
+    "vitest": "^3.2.4"
+  },
+  "license": "MIT",
+  "keywords": [
+    "react",
+    "drag",
+    "resize",
+    "rotate",
+    "headless",
+    "canvas",
+    "transform",
+    "moveable",
+    "gesture",
+    "design-tool"
+  ],
+  "homepage": "https://github.com/frameable/frameable#readme",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/frameable/frameable.git",
+    "directory": "packages/react"
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "paths": {
+      "@frameable/core": ["../../packages/core/src/index.ts"],
+      "@frameable/react": ["../../packages/react/src/index.ts"]
+    }
+  },
+  "include": ["src", "vite.config.ts"]
+}

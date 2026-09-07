@@ -1,0 +1,15 @@
+{
+  "name": "frameable-monorepo",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "pnpm -r --filter './packages/*' build",
+    "test": "pnpm -r --filter './packages/*' test",
+    "typecheck": "pnpm -r typecheck",
+    "dev": "pnpm --filter demo dev"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.2"
+  },
+  "packageManager": "pnpm@11.24.0"
+}

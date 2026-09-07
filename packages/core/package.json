@@ -1,0 +1,47 @@
+{
+  "name": "@frameable/core",
+  "version": "0.1.0",
+  "description": "Framework-agnostic math for dragging, resizing and rotating frames on a 2D surface",
+  "type": "module",
+  "sideEffects": false,
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsup src/index.ts --format esm,cjs --dts --clean",
+    "test": "vitest run",
+    "typecheck": "tsc -p tsconfig.json"
+  },
+  "devDependencies": {
+    "tsup": "^8.5.0",
+    "typescript": "^5.9.2",
+    "vitest": "^3.2.4"
+  },
+  "license": "MIT",
+  "keywords": [
+    "drag",
+    "resize",
+    "rotate",
+    "geometry",
+    "canvas",
+    "transform",
+    "matrix"
+  ],
+  "homepage": "https://github.com/frameable/frameable#readme",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/frameable/frameable.git",
+    "directory": "packages/core"
+  }
+}
