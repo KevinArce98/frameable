@@ -41,7 +41,17 @@
   "homepage": "https://github.com/KevinArce98/frameable#readme",
   "repository": {
     "type": "git",
-    "url": "https://github.com/KevinArce98/frameable.git",
+    "url": "git+https://github.com/KevinArce98/frameable.git",
     "directory": "packages/core"
+  },
+  "author": "Kevin Arias",
+  "bugs": {
+    "url": "https://github.com/KevinArce98/frameable/issues"
+  },
+  "engines": {
+    "node": "^20.19.0 || ^22.13.0 || >=24"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }

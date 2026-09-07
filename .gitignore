@@ -1,4 +1,13 @@
-node_modules
-dist
-.vite
+node_modules/
+dist/
+coverage/
+.vite/
+.eslintcache
+*.tsbuildinfo
 *.tgz
+*.log
+.env
+.env.*
+.DS_Store
+.idea/
+.vscode/

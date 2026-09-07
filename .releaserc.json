@@ -1,0 +1,47 @@
+{
+  "branches": ["main"],
+  "plugins": [
+    "@semantic-release/commit-analyzer",
+    "@semantic-release/release-notes-generator",
+    [
+      "@semantic-release/changelog",
+      {
+        "changelogFile": "CHANGELOG.md"
+      }
+    ],
+    [
+      "@semantic-release/npm",
+      {
+        "npmPublish": false,
+        "pkgRoot": "packages/core"
+      }
+    ],
+    [
+      "@semantic-release/npm",
+      {
+        "npmPublish": false,
+        "pkgRoot": "packages/react"
+      }
+    ],
+    [
+      "@semantic-release/exec",
+      {
+        "publishCmd": "pnpm -r --filter './packages/*' publish --access public --no-git-checks"
+      }
+    ],
+    [
+      "@semantic-release/git",
+      {
+        "assets": ["packages/core/package.json", "packages/react/package.json", "CHANGELOG.md"],
+        "message": "chore(release): ${nextRelease.version} [skip ci]\n\n${nextRelease.notes}"
+      }
+    ],
+    [
+      "@semantic-release/github",
+      {
+        "failComment": false,
+        "labels": false
+      }
+    ]
+  ]
+}

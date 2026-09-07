@@ -4,12 +4,45 @@
   "type": "module",
   "scripts": {
     "build": "pnpm -r --filter './packages/*' build",
-    "test": "pnpm -r --filter './packages/*' test",
+    "test": "pnpm --filter @frameable/core test -- --watch",
+    "test:run": "pnpm -r --filter './packages/*' test",
     "typecheck": "pnpm -r typecheck",
-    "dev": "pnpm --filter demo dev"
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --write \"**/*.{ts,tsx,css,json,md,yml}\"",
+    "format:check": "prettier --check \"**/*.{ts,tsx,css,json,md,yml}\"",
+    "dev": "pnpm --filter demo dev",
+    "release": "semantic-release"
   },
   "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@semantic-release/changelog": "^7.0.0",
+    "@semantic-release/commit-analyzer": "^13.0.1",
+    "@semantic-release/exec": "^7.1.0",
+    "@semantic-release/git": "^11.0.1",
+    "@semantic-release/github": "^12.0.9",
+    "@semantic-release/npm": "^13.1.5",
+    "@semantic-release/release-notes-generator": "^14.1.1",
+    "@typescript-eslint/eslint-plugin": "^8.69.0",
+    "@typescript-eslint/parser": "^8.69.0",
+    "eslint": "^10.10.0",
+    "globals": "^17.12.0",
+    "prettier": "^3.9.6",
+    "semantic-release": "^25.0.9",
     "typescript": "^5.9.2"
   },
-  "packageManager": "pnpm@11.24.0"
+  "packageManager": "pnpm@11.24.0",
+  "engines": {
+    "node": "^20.19.0 || ^22.13.0 || >=24"
+  },
+  "author": "Kevin Arias",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/KevinArce98/frameable.git"
+  },
+  "homepage": "https://github.com/KevinArce98/frameable#readme",
+  "bugs": {
+    "url": "https://github.com/KevinArce98/frameable/issues"
+  }
 }
