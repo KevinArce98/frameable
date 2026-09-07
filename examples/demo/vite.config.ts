@@ -1,7 +1,7 @@
-import react from '@vitejs/plugin-react'
-import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react';
+import { defineConfig } from 'vite';
 
-const src = (path: string) => decodeURIComponent(new URL(path, import.meta.url).pathname)
+const src = (path: string) => decodeURIComponent(new URL(path, import.meta.url).pathname);
 
 export default defineConfig({
   plugins: [react()],
@@ -11,4 +11,4 @@ export default defineConfig({
       '@frameable/react': src('../../packages/react/src/index.ts'),
     },
   },
-})
+});

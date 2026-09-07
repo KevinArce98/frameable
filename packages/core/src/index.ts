@@ -1,4 +1,4 @@
-export type * from './types'
+export type * from './types';
 export {
   HANDLES,
   HANDLE_DIRECTION,
@@ -14,7 +14,7 @@ export {
   pointerAngle,
   framesEqual,
   frameDelta,
-} from './geometry'
+} from './geometry';
 export {
   identity,
   multiply,
@@ -28,10 +28,10 @@ export {
   surfaceToScreen,
   screenToSurface,
   screenDeltaToSurface,
-} from './matrix'
-export { move, type MoveOptions } from './move'
-export { resize, type ResizeOptions } from './resize'
-export { rotate, rotationFromPointer, type RotateOptions } from './rotate'
-export { applyBounds } from './constraints'
-export { runSnappers, snapToGrid } from './snap'
-export { toStyle, toSVGTransform, type FrameStyle } from './style'
+} from './matrix';
+export { move, type MoveOptions } from './move';
+export { resize, type ResizeOptions } from './resize';
+export { rotate, rotationFromPointer, type RotateOptions } from './rotate';
+export { applyBounds } from './constraints';
+export { runSnappers, snapToGrid } from './snap';
+export { toStyle, toSVGTransform, type FrameStyle } from './style';

@@ -400,12 +400,30 @@ kbd {
   border: 1px solid transparent;
 }
 
-.tag--move { color: #93c5fd; background: rgba(59, 130, 246, 0.12); border-color: rgba(59, 130, 246, 0.3); }
-.tag--resize { color: #c4b5fd; background: rgba(139, 92, 246, 0.12); border-color: rgba(139, 92, 246, 0.3); }
-.tag--rotate { color: #fcd34d; background: rgba(245, 158, 11, 0.12); border-color: rgba(245, 158, 11, 0.3); }
-.tag--end { color: #86efac; }
-.tag--cancel { color: #fca5a5; }
-.tag--start { color: var(--fg-subtle); }
+.tag--move {
+  color: #93c5fd;
+  background: rgba(59, 130, 246, 0.12);
+  border-color: rgba(59, 130, 246, 0.3);
+}
+.tag--resize {
+  color: #c4b5fd;
+  background: rgba(139, 92, 246, 0.12);
+  border-color: rgba(139, 92, 246, 0.3);
+}
+.tag--rotate {
+  color: #fcd34d;
+  background: rgba(245, 158, 11, 0.12);
+  border-color: rgba(245, 158, 11, 0.3);
+}
+.tag--end {
+  color: #86efac;
+}
+.tag--cancel {
+  color: #fca5a5;
+}
+.tag--start {
+  color: var(--fg-subtle);
+}
 
 .shortcuts {
   display: grid;
@@ -568,14 +586,46 @@ kbd {
   transform: scale(1.2);
 }
 
-.handle[data-frameable-handle='n'] { left: 50%; top: 0; cursor: ns-resize; }
-.handle[data-frameable-handle='s'] { left: 50%; top: 100%; cursor: ns-resize; }
-.handle[data-frameable-handle='e'] { left: 100%; top: 50%; cursor: ew-resize; }
-.handle[data-frameable-handle='w'] { left: 0; top: 50%; cursor: ew-resize; }
-.handle[data-frameable-handle='ne'] { left: 100%; top: 0; cursor: nesw-resize; }
-.handle[data-frameable-handle='sw'] { left: 0; top: 100%; cursor: nesw-resize; }
-.handle[data-frameable-handle='nw'] { left: 0; top: 0; cursor: nwse-resize; }
-.handle[data-frameable-handle='se'] { left: 100%; top: 100%; cursor: nwse-resize; }
+.handle[data-frameable-handle='n'] {
+  left: 50%;
+  top: 0;
+  cursor: ns-resize;
+}
+.handle[data-frameable-handle='s'] {
+  left: 50%;
+  top: 100%;
+  cursor: ns-resize;
+}
+.handle[data-frameable-handle='e'] {
+  left: 100%;
+  top: 50%;
+  cursor: ew-resize;
+}
+.handle[data-frameable-handle='w'] {
+  left: 0;
+  top: 50%;
+  cursor: ew-resize;
+}
+.handle[data-frameable-handle='ne'] {
+  left: 100%;
+  top: 0;
+  cursor: nesw-resize;
+}
+.handle[data-frameable-handle='sw'] {
+  left: 0;
+  top: 100%;
+  cursor: nesw-resize;
+}
+.handle[data-frameable-handle='nw'] {
+  left: 0;
+  top: 0;
+  cursor: nwse-resize;
+}
+.handle[data-frameable-handle='se'] {
+  left: 100%;
+  top: 100%;
+  cursor: nwse-resize;
+}
 
 .rotate {
   position: absolute;

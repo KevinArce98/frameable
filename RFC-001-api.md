@@ -16,13 +16,13 @@ The core idea in one sentence: **you own the geometry, Frameable owns the math.*
 
 Open issues on the incumbents cluster like this (448 open issues on `moveable`, 81 on `react-rnd`, 43 on `use-gesture`, clustered by keyword in September 2026):
 
-| Problem | Issues | Root cause in the incumbents |
-|---|---|---|
-| Wrong resize, rotate or scale math | 157 | Geometry read back from DOM; rounding and transform-origin drift |
-| Breaks when a parent is zoomed or transformed | 77 | Screen-space deltas applied as if they were element-space |
-| Groups and multi-selection | 68 | Groups bolted on as a second component with its own state |
-| Snapping and guides | 59 | Snapping is a closed feature with dozens of flags instead of a function |
-| Inputs and editable text inside the element | 41 | Library captures pointer events before the app sees them |
+| Problem                                       | Issues | Root cause in the incumbents                                            |
+| --------------------------------------------- | ------ | ----------------------------------------------------------------------- |
+| Wrong resize, rotate or scale math            | 157    | Geometry read back from DOM; rounding and transform-origin drift        |
+| Breaks when a parent is zoomed or transformed | 77     | Screen-space deltas applied as if they were element-space               |
+| Groups and multi-selection                    | 68     | Groups bolted on as a second component with its own state               |
+| Snapping and guides                           | 59     | Snapping is a closed feature with dozens of flags instead of a function |
+| Inputs and editable text inside the element   | 41     | Library captures pointer events before the app sees them                |
 
 Every one of these is a consequence of the "library reads and writes the DOM" model. A controlled-geometry model makes them either trivial or explicit.
 
@@ -55,12 +55,12 @@ The unit of geometry. All values are in **surface units**, never screen pixels.
 
 ```ts
 type Frame = {
-  x: number
-  y: number
-  width: number
-  height: number
-  rotation: number
-}
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  rotation: number;
+};
 ```
 
 `x` and `y` are the top-left corner before rotation. `rotation` is in degrees, clockwise, around the frame center. This matches CSS `transform: rotate()` when `transform-origin` is `center`, which is the default `Transformer` output.
@@ -72,9 +72,7 @@ A `Frame` is deliberately not a matrix. Matrices are correct but nobody wants to
 A surface is the coordinate system your frames live in. It knows how to convert between screen pixels and surface units. This is the answer to the "parent is zoomed" family of bugs: the conversion is explicit and lives in one place.
 
 ```tsx
-<Surface viewport={{ zoom, pan }}>
-  {children}
-</Surface>
+<Surface viewport={{ zoom, pan }}>{children}</Surface>
 ```
 
 `viewport` is optional. When omitted, the surface measures its own DOM node with `getBoundingClientRect` and derives the matrix from the element's computed transform chain. When you already track zoom and pan in state, pass them and no measurement happens.
@@ -87,15 +85,15 @@ Every interaction, whether from pointer or keyboard, is a transaction with three
 
 ```ts
 type Transaction = {
-  id: string
-  kind: 'move' | 'resize' | 'rotate' | 'select'
-  phase: 'start' | 'update' | 'end' | 'cancel'
-  initial: Frame
-  frame: Frame
-  delta: Partial<Frame>
-  modifiers: { shift: boolean; alt: boolean; meta: boolean; ctrl: boolean }
-  source: 'pointer' | 'keyboard' | 'programmatic'
-}
+  id: string;
+  kind: 'move' | 'resize' | 'rotate' | 'select';
+  phase: 'start' | 'update' | 'end' | 'cancel';
+  initial: Frame;
+  frame: Frame;
+  delta: Partial<Frame>;
+  modifiers: { shift: boolean; alt: boolean; meta: boolean; ctrl: boolean };
+  source: 'pointer' | 'keyboard' | 'programmatic';
+};
 ```
 
 `update` fires on every animation frame while the interaction is live. `end` fires once with the final frame. `cancel` fires on Escape or pointer cancel and restores `initial`.
@@ -109,33 +107,40 @@ This is the single integration point for undo, autosave, collaboration and analy
 The primary hook. One element, one frame.
 
 ```tsx
-const { frame, getDragProps, getHandleProps, getRotateProps, getKeyboardProps, isActive, transaction } =
-  useFrame({
-    frame,
-    onChange,
-    onTransaction,
-    constraints,
-    snap,
-    disabled,
-  })
+const {
+  frame,
+  getDragProps,
+  getHandleProps,
+  getRotateProps,
+  getKeyboardProps,
+  isActive,
+  transaction,
+} = useFrame({
+  frame,
+  onChange,
+  onTransaction,
+  constraints,
+  snap,
+  disabled,
+});
 ```
 
 Options:
 
-| Option | Type | Notes |
-|---|---|---|
-| `frame` | `Frame` | Required. Controlled value. |
-| `onChange` | `(frame: Frame) => void` | Required. Called on every `update` and on `end`. |
-| `onTransaction` | `(t: Transaction) => void` | Optional. Full lifecycle. |
-| `constraints` | `Constraints` | Min and max size, aspect ratio, bounds, allowed operations. |
-| `snap` | `Snapper \| Snapper[]` | See Snapping. |
-| `disabled` | `boolean` | Removes all listeners, keeps props stable. |
+| Option          | Type                       | Notes                                                       |
+| --------------- | -------------------------- | ----------------------------------------------------------- |
+| `frame`         | `Frame`                    | Required. Controlled value.                                 |
+| `onChange`      | `(frame: Frame) => void`   | Required. Called on every `update` and on `end`.            |
+| `onTransaction` | `(t: Transaction) => void` | Optional. Full lifecycle.                                   |
+| `constraints`   | `Constraints`              | Min and max size, aspect ratio, bounds, allowed operations. |
+| `snap`          | `Snapper \| Snapper[]`     | See Snapping.                                               |
+| `disabled`      | `boolean`                  | Removes all listeners, keeps props stable.                  |
 
 Returned prop getters follow the Downshift convention: spread them, they compose with your own handlers.
 
 ```tsx
 function Box({ frame, onChange }) {
-  const f = useFrame({ frame, onChange })
+  const f = useFrame({ frame, onChange });
 
   return (
     <div {...f.getDragProps()} {...f.getKeyboardProps()} style={toStyle(f.frame)}>
@@ -143,7 +148,7 @@ function Box({ frame, onChange }) {
       <span {...f.getHandleProps('n')} />
       <span {...f.getRotateProps()} />
     </div>
-  )
+  );
 }
 ```
 
@@ -155,15 +160,15 @@ Handle names: `n`, `ne`, `e`, `se`, `s`, `sw`, `w`, `nw`. A handle is any elemen
 
 ```ts
 type Constraints = {
-  minWidth?: number
-  minHeight?: number
-  maxWidth?: number
-  maxHeight?: number
-  aspectRatio?: number | 'preserve'
-  bounds?: Frame | 'parent'
-  operations?: Array<'move' | 'resize' | 'rotate'>
-  rotationStep?: number
-}
+  minWidth?: number;
+  minHeight?: number;
+  maxWidth?: number;
+  maxHeight?: number;
+  aspectRatio?: number | 'preserve';
+  bounds?: Frame | 'parent';
+  operations?: Array<'move' | 'resize' | 'rotate'>;
+  rotationStep?: number;
+};
 ```
 
 Modifier keys have fixed meanings that match Figma, Sketch and Illustrator, because users bring those expectations:
@@ -179,20 +184,20 @@ These are on by default. Turn them off per interaction with `modifiers: false` o
 Snapping is a pure function. It receives the candidate frame and returns a snapped frame plus guides to draw. No flags.
 
 ```ts
-type Snapper = (candidate: Frame, ctx: SnapContext) => SnapResult | null
+type Snapper = (candidate: Frame, ctx: SnapContext) => SnapResult | null;
 
 type SnapContext = {
-  transaction: Transaction
-  surface: SurfaceInfo
-  threshold: number
-}
+  transaction: Transaction;
+  surface: SurfaceInfo;
+  threshold: number;
+};
 
 type SnapResult = {
-  frame: Frame
-  guides: Guide[]
-}
+  frame: Frame;
+  guides: Guide[];
+};
 
-type Guide = { axis: 'x' | 'y'; position: number; from?: number; to?: number }
+type Guide = { axis: 'x' | 'y'; position: number; from?: number; to?: number };
 ```
 
 Built-in snappers cover the common cases and are composable:
@@ -206,7 +211,7 @@ useFrame({
     snapToFrames(otherFrames, { edges: true, centers: true }),
     snapToBounds(canvasFrame),
   ],
-})
+});
 ```
 
 Guides come back on the hook as `guides` so you render them however you like. Frameable never draws a line.
@@ -274,14 +279,14 @@ It is implemented with `useFrame` and nothing else. It exists so the README demo
 
 `getKeyboardProps()` adds `tabIndex`, `role`, `aria-label`, `aria-roledescription` and key handlers:
 
-| Keys | Action |
-|---|---|
-| Arrows | Move 1 unit |
-| Shift + Arrows | Move 10 units |
-| Alt + Arrows | Resize 1 unit from the bottom-right |
-| Cmd/Ctrl + `[` and `]` | Rotate 1° |
-| Enter | Start a keyboard transaction, announces "moving" |
-| Escape | Cancel the live transaction |
+| Keys                   | Action                                           |
+| ---------------------- | ------------------------------------------------ |
+| Arrows                 | Move 1 unit                                      |
+| Shift + Arrows         | Move 10 units                                    |
+| Alt + Arrows           | Resize 1 unit from the bottom-right              |
+| Cmd/Ctrl + `[` and `]` | Rotate 1°                                        |
+| Enter                  | Start a keyboard transaction, announces "moving" |
+| Escape                 | Cancel the live transaction                      |
 
 Keyboard interactions produce the same `Transaction` objects as pointer ones. Live region announcements are provided through `useAnnouncer`, which the app renders once.
 
@@ -304,9 +309,9 @@ For the opposite need, a dedicated drag handle inside the element, spread `getDr
 Everything above compiles down to pure functions with no React:
 
 ```ts
-import { move, resize, rotate, groupBounds, applyToGroup, screenToSurface } from '@frameable/core'
+import { move, resize, rotate, groupBounds, applyToGroup, screenToSurface } from '@frameable/core';
 
-const next = resize(frame, { handle: 'se', delta: { x: 12, y: 4 }, preserveAspect: true })
+const next = resize(frame, { handle: 'se', delta: { x: 12, y: 4 }, preserveAspect: true });
 ```
 
 These are exported so Vue, Svelte and vanilla users can build their own bindings, and so the math is testable without a DOM. The React package is thin.
@@ -321,18 +326,18 @@ Because the library never reads element geometry, subpixel rounding, CSS transit
 
 ## Comparison
 
-| | Frameable | react-moveable | react-rnd | dnd-kit | use-gesture | interactjs |
-|---|---|---|---|---|---|---|
-| Maintained | yes | no since 2024 | slow | yes | no since 2024 | yes |
-| Controlled geometry | yes | no | partial | n/a | n/a | no |
-| Correct under zoomed parent | yes | no | no | n/a | manual | manual |
-| Rotate | yes | yes | no | no | manual | no |
-| Groups | yes | yes | no | no | no | no |
-| Snapping | function | flags | grid only | no | no | modifiers |
-| Marquee selection | yes | via selecto | no | no | no | no |
-| Keyboard | yes | no | no | sortable only | no | no |
-| Headless | yes | no | no | yes | yes | yes |
-| Size, min+gz | target < 8 kB | 106 kB | not measured with deps | not measured with deps | 8 kB | 28 kB |
+|                             | Frameable     | react-moveable | react-rnd              | dnd-kit                | use-gesture   | interactjs |
+| --------------------------- | ------------- | -------------- | ---------------------- | ---------------------- | ------------- | ---------- |
+| Maintained                  | yes           | no since 2024  | slow                   | yes                    | no since 2024 | yes        |
+| Controlled geometry         | yes           | no             | partial                | n/a                    | n/a           | no         |
+| Correct under zoomed parent | yes           | no             | no                     | n/a                    | manual        | manual     |
+| Rotate                      | yes           | yes            | no                     | no                     | manual        | no         |
+| Groups                      | yes           | yes            | no                     | no                     | no            | no         |
+| Snapping                    | function      | flags          | grid only              | no                     | no            | modifiers  |
+| Marquee selection           | yes           | via selecto    | no                     | no                     | no            | no         |
+| Keyboard                    | yes           | no             | no                     | sortable only          | no            | no         |
+| Headless                    | yes           | no             | no                     | yes                    | yes           | yes        |
+| Size, min+gz                | target < 8 kB | 106 kB         | not measured with deps | not measured with deps | 8 kB          | 28 kB      |
 
 Sizes measured September 2026: `react-moveable` from its bundled ESM entry, `@use-gesture/react` and `interactjs` from Bundlephobia. `react-rnd` and `@dnd-kit/react` split their code across dependencies, so the entry file alone understates them and is omitted.
 

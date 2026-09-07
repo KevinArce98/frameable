@@ -24,28 +24,32 @@ npm i @frameable/react
 ## Quick start
 
 ```tsx
-import { useState } from 'react'
-import { Surface, useFrame, toStyle } from '@frameable/react'
+import { useState } from 'react';
+import { Surface, useFrame, toStyle } from '@frameable/react';
 
 function Box({ frame, onChange }) {
-  const f = useFrame({ frame, onChange, constraints: { minWidth: 40, minHeight: 40 } })
+  const f = useFrame({ frame, onChange, constraints: { minWidth: 40, minHeight: 40 } });
 
   return (
-    <div {...f.getDragProps()} {...f.getKeyboardProps()} style={{ ...toStyle(frame), ...f.getDragProps().style }}>
+    <div
+      {...f.getDragProps()}
+      {...f.getKeyboardProps()}
+      style={{ ...toStyle(frame), ...f.getDragProps().style }}
+    >
       <span {...f.getHandleProps('se')} className="handle" />
       <span {...f.getRotateProps()} className="rotate" />
     </div>
-  )
+  );
 }
 
 export function Canvas() {
-  const [frame, setFrame] = useState({ x: 80, y: 80, width: 240, height: 160, rotation: 0 })
+  const [frame, setFrame] = useState({ x: 80, y: 80, width: 240, height: 160, rotation: 0 });
 
   return (
     <Surface style={{ position: 'absolute', inset: 0 }}>
       <Box frame={frame} onChange={setFrame} />
     </Surface>
-  )
+  );
 }
 ```
 
@@ -55,13 +59,13 @@ The frame is yours. Put it in `useState`, Zustand, Jotai, Yjs or a database row.
 
 Open issues on the libraries this replaces cluster into five problems. Each one is a consequence of the library reading and writing the DOM.
 
-| Problem | Frameable |
-|---|---|
-| Resize and rotate math drifts, subpixel rounding | Deltas are computed from the initial pointer, never accumulated |
-| Breaks when a parent is zoomed or transformed | `Surface` converts screen pixels to surface units with an explicit matrix |
+| Problem                                                  | Frameable                                                                                       |
+| -------------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
+| Resize and rotate math drifts, subpixel rounding         | Deltas are computed from the initial pointer, never accumulated                                 |
+| Breaks when a parent is zoomed or transformed            | `Surface` converts screen pixels to surface units with an explicit matrix                       |
 | Inputs and editable text inside the element stop working | Pointer downs on `input`, `textarea`, `button`, `a`, `[contenteditable]` are ignored by default |
-| Snapping is a wall of boolean flags | A snapper is a function: `(candidate, ctx) => { frame, guides }` |
-| No keyboard, no screen reader | Arrow keys, modifiers and ARIA attributes ship with `getKeyboardProps()` |
+| Snapping is a wall of boolean flags                      | A snapper is a function: `(candidate, ctx) => { frame, guides }`                                |
+| No keyboard, no screen reader                            | Arrow keys, modifiers and ARIA attributes ship with `getKeyboardProps()`                        |
 
 ## Zoomed canvases
 
@@ -69,7 +73,12 @@ Pass your zoom and pan to `Surface` and every interaction resolves in surface un
 
 ```tsx
 <Surface viewport={{ zoom, pan }} style={{ position: 'absolute', inset: 0 }}>
-  <div style={{ transform: `translate(${pan.x}px, ${pan.y}px) scale(${zoom})`, transformOrigin: '0 0' }}>
+  <div
+    style={{
+      transform: `translate(${pan.x}px, ${pan.y}px) scale(${zoom})`,
+      transformOrigin: '0 0',
+    }}
+  >
     <Box frame={frame} onChange={setFrame} />
   </div>
 </Surface>
@@ -79,16 +88,16 @@ Pass your zoom and pan to `Surface` and every interaction resolves in surface un
 
 ### `useFrame(options)`
 
-| Option | Type | Description |
-|---|---|---|
-| `frame` | `Frame` | Controlled value: `{ x, y, width, height, rotation }` in surface units |
-| `onChange` | `(frame) => void` | Called on every animation frame during an interaction and once at the end |
-| `onTransaction` | `(t) => void` | Full lifecycle: `start`, `update`, `end`, `cancel` with `initial`, `frame`, `delta`, `modifiers`, `source` |
-| `constraints` | `Constraints` | `minWidth`, `minHeight`, `maxWidth`, `maxHeight`, `aspectRatio`, `bounds`, `operations`, `rotationStep` |
-| `snap` | `Snapper \| Snapper[]` | Composable snapping, see below |
-| `disabled` | `boolean` | Removes all listeners, keeps props stable |
-| `interactiveSelector` | `string \| false` | Elements that should receive pointer events instead of starting a drag |
-| `label` | `string` | Accessible name for the frame |
+| Option                | Type                   | Description                                                                                                |
+| --------------------- | ---------------------- | ---------------------------------------------------------------------------------------------------------- |
+| `frame`               | `Frame`                | Controlled value: `{ x, y, width, height, rotation }` in surface units                                     |
+| `onChange`            | `(frame) => void`      | Called on every animation frame during an interaction and once at the end                                  |
+| `onTransaction`       | `(t) => void`          | Full lifecycle: `start`, `update`, `end`, `cancel` with `initial`, `frame`, `delta`, `modifiers`, `source` |
+| `constraints`         | `Constraints`          | `minWidth`, `minHeight`, `maxWidth`, `maxHeight`, `aspectRatio`, `bounds`, `operations`, `rotationStep`    |
+| `snap`                | `Snapper \| Snapper[]` | Composable snapping, see below                                                                             |
+| `disabled`            | `boolean`              | Removes all listeners, keeps props stable                                                                  |
+| `interactiveSelector` | `string \| false`      | Elements that should receive pointer events instead of starting a drag                                     |
+| `label`               | `string`               | Accessible name for the frame                                                                              |
 
 Returns `{ frame, isActive, transaction, guides, getDragProps, getHandleProps, getRotateProps, getKeyboardProps }`. Spread the prop getters on your elements. Handles are named `n`, `ne`, `e`, `se`, `s`, `sw`, `w`, `nw`.
 
@@ -102,29 +111,29 @@ Same semantics as Figma, on by default.
 
 ### Keyboard
 
-| Keys | Action |
-|---|---|
-| Arrows | Move by 1 |
-| `Shift` + Arrows | Move by 10 |
-| `Alt` + Arrows | Resize from the bottom-right |
+| Keys                   | Action                            |
+| ---------------------- | --------------------------------- |
+| Arrows                 | Move by 1                         |
+| `Shift` + Arrows       | Move by 10                        |
+| `Alt` + Arrows         | Resize from the bottom-right      |
 | `Cmd`/`Ctrl` + `[` `]` | Rotate by 1°, by 15° with `Shift` |
 
 ### Snapping
 
 ```tsx
-import { snapToGrid } from '@frameable/react'
+import { snapToGrid } from '@frameable/react';
 
-useFrame({ frame, onChange, snap: snapToGrid(8) })
+useFrame({ frame, onChange, snap: snapToGrid(8) });
 ```
 
 A custom snapper is a pure function. Return `null` to pass through.
 
 ```ts
 const snapToBaseline: Snapper = (candidate, ctx) => {
-  if (ctx.kind !== 'move') return null
-  const y = Math.round(candidate.y / 4) * 4
-  return { frame: { ...candidate, y }, guides: [{ axis: 'y', position: y }] }
-}
+  if (ctx.kind !== 'move') return null;
+  const y = Math.round(candidate.y / 4) * 4;
+  return { frame: { ...candidate, y }, guides: [{ axis: 'y', position: y }] };
+};
 ```
 
 ### `Surface`
@@ -137,16 +146,16 @@ Everything above is built on pure functions with no React and no DOM: `move`, `r
 
 ## Comparison
 
-| | Frameable | react-moveable | react-rnd | @use-gesture/react |
-|---|---|---|---|---|
-| Maintained | yes | no release since 2024 | slow | no release since 2024 |
-| Controlled geometry | yes | no | partial | n/a |
-| Correct under zoomed parent | yes | no | no | manual |
-| Rotate | yes | yes | no | manual |
-| Snapping | function | flags | grid only | no |
-| Keyboard | yes | no | no | no |
-| Headless | yes | no | no | yes |
-| Size, min+gzip | 3.3 kB + 2.9 kB core | 106 kB | not measured | 8 kB |
+|                             | Frameable            | react-moveable        | react-rnd    | @use-gesture/react    |
+| --------------------------- | -------------------- | --------------------- | ------------ | --------------------- |
+| Maintained                  | yes                  | no release since 2024 | slow         | no release since 2024 |
+| Controlled geometry         | yes                  | no                    | partial      | n/a                   |
+| Correct under zoomed parent | yes                  | no                    | no           | manual                |
+| Rotate                      | yes                  | yes                   | no           | manual                |
+| Snapping                    | function             | flags                 | grid only    | no                    |
+| Keyboard                    | yes                  | no                    | no           | no                    |
+| Headless                    | yes                  | no                    | no           | yes                   |
+| Size, min+gzip              | 3.3 kB + 2.9 kB core | 106 kB                | not measured | 8 kB                  |
 
 Frameable is complementary to `@dnd-kit/react` and `pragmatic-drag-and-drop`. Use those when the question is "where in this list does this go". Use Frameable when the question is "what are the coordinates of this thing now".
 

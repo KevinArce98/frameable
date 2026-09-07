@@ -13,7 +13,7 @@ npm i @frameable/core
 All values are in surface units, never screen pixels.
 
 ```ts
-type Frame = { x: number; y: number; width: number; height: number; rotation: number }
+type Frame = { x: number; y: number; width: number; height: number; rotation: number };
 ```
 
 `x` and `y` are the top-left corner before rotation. `rotation` is in degrees, clockwise, around the center.
@@ -21,15 +21,15 @@ type Frame = { x: number; y: number; width: number; height: number; rotation: nu
 ## Operations
 
 ```ts
-import { move, resize, rotate, rotationFromPointer } from '@frameable/core'
+import { move, resize, rotate, rotationFromPointer } from '@frameable/core';
 
-move(frame, { x: 10, y: 0 }, { axisLock: true })
+move(frame, { x: 10, y: 0 }, { axisLock: true });
 
-resize(frame, { handle: 'se', delta: { x: 24, y: 12 }, preserveAspect: true, minWidth: 40 })
+resize(frame, { handle: 'se', delta: { x: 24, y: 12 }, preserveAspect: true, minWidth: 40 });
 
-rotate(frame, { to: 47, step: 15 })
+rotate(frame, { to: 47, step: 15 });
 
-rotationFromPointer(initialFrame, startPoint, currentPoint)
+rotationFromPointer(initialFrame, startPoint, currentPoint);
 ```
 
 `resize` keeps the handle opposite to the one being dragged fixed in surface space, for any rotation. `fromCenter: true` keeps the center fixed instead.
@@ -37,11 +37,11 @@ rotationFromPointer(initialFrame, startPoint, currentPoint)
 ## Coordinate systems
 
 ```ts
-import { fromViewport, multiply, screenToSurface, screenDeltaToSurface } from '@frameable/core'
+import { fromViewport, multiply, screenToSurface, screenDeltaToSurface } from '@frameable/core';
 
-const matrix = fromViewport({ zoom: 2, pan: { x: 100, y: 40 } })
-screenToSurface({ x: 300, y: 140 }, matrix)
-screenDeltaToSurface({ x: 10, y: 10 }, matrix)
+const matrix = fromViewport({ zoom: 2, pan: { x: 100, y: 40 } });
+screenToSurface({ x: 300, y: 140 }, matrix);
+screenDeltaToSurface({ x: 10, y: 10 }, matrix);
 ```
 
 Matrices compose with `multiply`, so an outer CSS scale and an inner viewport resolve through one call.
@@ -49,10 +49,10 @@ Matrices compose with `multiply`, so an outer CSS scale and an inner viewport re
 ## Snapping and constraints
 
 ```ts
-import { runSnappers, snapToGrid, applyBounds } from '@frameable/core'
+import { runSnappers, snapToGrid, applyBounds } from '@frameable/core';
 
-const { frame, guides } = runSnappers(candidate, [snapToGrid(8)], { kind: 'move', threshold: 4 })
-applyBounds(frame, { x: 0, y: 0, width: 1200, height: 800, rotation: 0 })
+const { frame, guides } = runSnappers(candidate, [snapToGrid(8)], { kind: 'move', threshold: 4 });
+applyBounds(frame, { x: 0, y: 0, width: 1200, height: 800, rotation: 0 });
 ```
 
 ## Geometry helpers
