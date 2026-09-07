@@ -9,8 +9,8 @@
     "typecheck": "tsc -p tsconfig.json"
   },
   "dependencies": {
-    "@frameable/core": "workspace:*",
-    "@frameable/react": "workspace:*",
+    "frameable-core": "workspace:*",
+    "frameable": "workspace:*",
     "react": "^19.1.1",
     "react-dom": "^19.1.1"
   },

@@ -1,7 +1,7 @@
-import { HANDLES, screenToSurface } from '@frameable/core';
-import type { Frame, Snapper, Transaction } from '@frameable/core';
-import { Surface, snapToGrid, toStyle, useFrame } from '@frameable/react';
-import type { SurfaceHandle } from '@frameable/react';
+import { HANDLES, screenToSurface } from 'frameable-core';
+import type { Frame, Snapper, Transaction } from 'frameable-core';
+import { Surface, snapToGrid, toStyle, useFrame } from 'frameable';
+import type { SurfaceHandle } from 'frameable';
 import { useCallback, useMemo, useRef, useState } from 'react';
 import type { ChangeEvent, PointerEvent as ReactPointerEvent, ReactNode, WheelEvent } from 'react';
 import {
@@ -250,7 +250,7 @@ export function App() {
 
   const copyInstall = async () => {
     try {
-      await navigator.clipboard.writeText('npm i @frameable/react');
+      await navigator.clipboard.writeText('npm i frameable');
       setCopied(true);
       setTimeout(() => setCopied(false), 1600);
     } catch {
@@ -316,7 +316,7 @@ export function App() {
           </a>
           <button type="button" className="btn btn--primary topbar__cta" onClick={copyInstall}>
             {copied ? <CheckIcon /> : <CopyIcon />}
-            <code>npm i @frameable/react</code>
+            <code>npm i frameable</code>
           </button>
         </div>
       </header>

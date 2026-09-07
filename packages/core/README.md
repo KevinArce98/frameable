@@ -1,11 +1,11 @@
-# @frameable/core
+# frameable-core
 
 Framework-agnostic math for dragging, resizing and rotating frames on a 2D surface. No React, no DOM, no dependencies. 2.9 kB min+gzip.
 
-This is the engine behind [`@frameable/react`](https://www.npmjs.com/package/@frameable/react). Use it directly to build bindings for Vue, Svelte or vanilla JS, or to precompute layouts on the server.
+This is the engine behind [`frameable`](https://www.npmjs.com/package/frameable). Use it directly to build bindings for Vue, Svelte or vanilla JS, or to precompute layouts on the server.
 
 ```bash
-npm i @frameable/core
+npm i frameable-core
 ```
 
 ## Frame
@@ -21,7 +21,7 @@ type Frame = { x: number; y: number; width: number; height: number; rotation: nu
 ## Operations
 
 ```ts
-import { move, resize, rotate, rotationFromPointer } from '@frameable/core';
+import { move, resize, rotate, rotationFromPointer } from 'frameable-core';
 
 move(frame, { x: 10, y: 0 }, { axisLock: true });
 
@@ -37,7 +37,7 @@ rotationFromPointer(initialFrame, startPoint, currentPoint);
 ## Coordinate systems
 
 ```ts
-import { fromViewport, multiply, screenToSurface, screenDeltaToSurface } from '@frameable/core';
+import { fromViewport, multiply, screenToSurface, screenDeltaToSurface } from 'frameable-core';
 
 const matrix = fromViewport({ zoom: 2, pan: { x: 100, y: 40 } });
 screenToSurface({ x: 300, y: 140 }, matrix);
@@ -49,7 +49,7 @@ Matrices compose with `multiply`, so an outer CSS scale and an inner viewport re
 ## Snapping and constraints
 
 ```ts
-import { runSnappers, snapToGrid, applyBounds } from '@frameable/core';
+import { runSnappers, snapToGrid, applyBounds } from 'frameable-core';
 
 const { frame, guides } = runSnappers(candidate, [snapToGrid(8)], { kind: 'move', threshold: 4 });
 applyBounds(frame, { x: 0, y: 0, width: 1200, height: 800, rotation: 0 });

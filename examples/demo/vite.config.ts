@@ -7,8 +7,8 @@ export default defineConfig({
   plugins: [react()],
   resolve: {
     alias: {
-      '@frameable/core': src('../../packages/core/src/index.ts'),
-      '@frameable/react': src('../../packages/react/src/index.ts'),
+      'frameable-core': src('../../packages/core/src/index.ts'),
+      frameable: src('../../packages/react/src/index.ts'),
     },
   },
 });

@@ -4,8 +4,8 @@
 </p>
 
 <p align="center">
-  <a href="https://www.npmjs.com/package/@frameable/react"><img alt="npm" src="https://img.shields.io/npm/v/@frameable/react?color=3b82f6&label=npm" /></a>
-  <a href="https://bundlephobia.com/package/@frameable/react"><img alt="size" src="https://img.shields.io/bundlephobia/minzip/@frameable/react?color=3b82f6&label=min%2Bgzip" /></a>
+  <a href="https://www.npmjs.com/package/frameable"><img alt="npm" src="https://img.shields.io/npm/v/frameable?color=3b82f6&label=npm" /></a>
+  <a href="https://bundlephobia.com/package/frameable"><img alt="size" src="https://img.shields.io/bundlephobia/minzip/frameable?color=3b82f6&label=min%2Bgzip" /></a>
   <img alt="license" src="https://img.shields.io/badge/license-MIT-3b82f6" />
 </p>
 
@@ -18,14 +18,14 @@ Frameable turns pointer and keyboard input into changes to a plain `Frame` objec
 It is the successor to the role `react-moveable`, `react-rnd` and `@use-gesture/react` play today, designed around the failure modes those libraries collected in their issue trackers.
 
 ```bash
-npm i @frameable/react
+npm i frameable
 ```
 
 ## Quick start
 
 ```tsx
 import { useState } from 'react';
-import { Surface, useFrame, toStyle } from '@frameable/react';
+import { Surface, useFrame, toStyle } from 'frameable';
 
 function Box({ frame, onChange }) {
   const f = useFrame({ frame, onChange, constraints: { minWidth: 40, minHeight: 40 } });
@@ -121,7 +121,7 @@ Same semantics as Figma, on by default.
 ### Snapping
 
 ```tsx
-import { snapToGrid } from '@frameable/react';
+import { snapToGrid } from 'frameable';
 
 useFrame({ frame, onChange, snap: snapToGrid(8) });
 ```
@@ -140,7 +140,7 @@ const snapToBaseline: Snapper = (candidate, ctx) => {
 
 Provides the coordinate system. Renders a `div`, accepts `viewport={{ zoom, pan }}` and any div props. Exposes `getMatrix()` through its ref so you can convert pointer positions yourself.
 
-### `@frameable/core`
+### `frameable-core`
 
 Everything above is built on pure functions with no React and no DOM: `move`, `resize`, `rotate`, `applyBounds`, `runSnappers`, viewport matrices and style helpers. Use it to build bindings for other frameworks or to precompute layouts on the server.
 

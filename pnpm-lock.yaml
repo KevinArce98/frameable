@@ -56,12 +56,12 @@ importers:
 
   examples/demo:
     dependencies:
-      '@frameable/core':
-        specifier: workspace:*
-        version: link:../../packages/core
-      '@frameable/react':
+      frameable:
         specifier: workspace:*
         version: link:../../packages/react
+      frameable-core:
+        specifier: workspace:*
+        version: link:../../packages/core
       react:
         specifier: ^19.1.1
         version: 19.2.8
@@ -99,7 +99,7 @@ importers:
 
   packages/react:
     dependencies:
-      '@frameable/core':
+      frameable-core:
         specifier: workspace:^
         version: link:../core
     devDependencies:

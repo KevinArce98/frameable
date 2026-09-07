@@ -1,7 +1,7 @@
 # RFC 001: Frameable — direct-manipulation primitives for React
 
 - Status: Draft, open for comments
-- Working name: `@frameable/react` (name is a placeholder)
+- Working name: `frameable` (name is a placeholder)
 - Scope of this RFC: public API of v1. Implementation details are out of scope unless they constrain the API.
 
 ## Summary
@@ -304,12 +304,12 @@ For the opposite need, a dedicated drag handle inside the element, spread `getDr
 - Updates coalesced to one per animation frame. `onChange` never fires more than 60 or 120 times a second.
 - Deltas are computed from the initial pointer position, not accumulated, so rounding cannot drift over a long drag. This is the direct fix for the oldest open issue on `moveable`.
 
-### Low-level escape hatch: `@frameable/core`
+### Low-level escape hatch: `frameable-core`
 
 Everything above compiles down to pure functions with no React:
 
 ```ts
-import { move, resize, rotate, groupBounds, applyToGroup, screenToSurface } from '@frameable/core';
+import { move, resize, rotate, groupBounds, applyToGroup, screenToSurface } from 'frameable-core';
 
 const next = resize(frame, { handle: 'se', delta: { x: 12, y: 4 }, preserveAspect: true });
 ```
@@ -363,13 +363,13 @@ The main change for users is that the element no longer gets its position from M
 3. **Surface auto-measurement.** Measuring the transform chain on every pointer down is cheap. Measuring it on every frame is not. Proposal: measure on `start`, assume stable during a transaction, expose `surface.invalidate()` for apps that zoom mid-drag.
 4. **Name.** `frameable` is available on npm. Alternatives welcome.
 5. **Touch gestures.** Pinch to resize and two-finger rotate are natural on tablets. Separate hook `usePinch` in 1.1, or fold into `useFrame` with a `touch` option?
-6. **Server Components.** Hooks carry `'use client'`. Should `@frameable/core` be usable during SSR for layout precomputation? It has no DOM dependency, so yes by construction, but it needs to be documented.
+6. **Server Components.** Hooks carry `'use client'`. Should `frameable-core` be usable during SSR for layout precomputation? It has no DOM dependency, so yes by construction, but it needs to be documented.
 
 ## Roadmap
 
 - **0.1**: `useFrame`, `Surface`, `toStyle`, `snapToGrid`, keyboard. Enough to replace `react-rnd`.
 - **0.2**: `useSelection`, `useGroup`, `snapToFrames`, `Transformer`. Enough to replace `react-moveable` plus `react-selecto` for 80 % of users.
-- **0.3**: `usePinch`, guides rendering helpers, Vue bindings from `@frameable/core`.
+- **0.3**: `usePinch`, guides rendering helpers, Vue bindings from `frameable-core`.
 - **1.0**: API freeze after two months without breaking changes.
 
 ## Feedback wanted

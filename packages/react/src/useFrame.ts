@@ -9,7 +9,7 @@ import {
   rotate,
   runSnappers,
   screenToSurface,
-} from '@frameable/core';
+} from 'frameable-core';
 import type {
   Constraints,
   Frame,
@@ -22,7 +22,7 @@ import type {
   Snapper,
   Transaction,
   TransactionSource,
-} from '@frameable/core';
+} from 'frameable-core';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { CSSProperties, KeyboardEvent, PointerEvent } from 'react';
 import { useSurface } from './Surface';

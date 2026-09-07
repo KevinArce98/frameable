@@ -2,7 +2,7 @@
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "paths": {
-      "@frameable/core": ["../core/src/index.ts"]
+      "frameable-core": ["../core/src/index.ts"]
     }
   },
   "include": ["src"]

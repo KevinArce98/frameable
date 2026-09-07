@@ -1,5 +1,5 @@
 {
-  "name": "@frameable/react",
+  "name": "frameable",
   "version": "0.1.0",
   "description": "Headless React hooks for dragging, resizing and rotating frames on a 2D surface",
   "type": "module",
@@ -19,12 +19,12 @@
     "README.md"
   ],
   "scripts": {
-    "build": "tsup src/index.ts --format esm,cjs --dts --clean --external react --external @frameable/core",
+    "build": "tsup src/index.ts --format esm,cjs --dts --clean --external react --external frameable-core",
     "test": "vitest run --passWithNoTests",
     "typecheck": "tsc -p tsconfig.json"
   },
   "dependencies": {
-    "@frameable/core": "workspace:^"
+    "frameable-core": "workspace:^"
   },
   "peerDependencies": {
     "react": ">=18"

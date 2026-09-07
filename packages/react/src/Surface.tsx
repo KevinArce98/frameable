@@ -1,6 +1,6 @@
 'use client';
-import { fromViewport, identity, multiply } from '@frameable/core';
-import type { Matrix, Viewport } from '@frameable/core';
+import { fromViewport, identity, multiply } from 'frameable-core';
+import type { Matrix, Viewport } from 'frameable-core';
 import { createContext, forwardRef, useContext, useImperativeHandle, useMemo, useRef } from 'react';
 import type { CSSProperties, HTMLAttributes, ReactNode, Ref } from 'react';
 
