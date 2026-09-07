@@ -4,6 +4,7 @@ import { defineConfig } from 'vite';
 const src = (path: string) => decodeURIComponent(new URL(path, import.meta.url).pathname);
 
 export default defineConfig({
+  base: process.env.DEMO_BASE ?? '/',
   plugins: [react()],
   resolve: {
     alias: {

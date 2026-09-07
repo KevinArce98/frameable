@@ -9,6 +9,10 @@
   <img alt="license" src="https://img.shields.io/badge/license-MIT-3b82f6" />
 </p>
 
+<p align="center">
+  <a href="https://kevinarce98.github.io/frameable/"><strong>Live demo</strong></a> · <a href="https://github.com/KevinArce98/frameable/blob/main/RFC-001-api.md">RFC 001</a>
+</p>
+
 ---
 
 **You own the geometry. Frameable owns the math.**
