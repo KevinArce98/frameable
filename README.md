@@ -157,7 +157,7 @@ Frameable is complementary to `@dnd-kit/react` and `pragmatic-drag-and-drop`. Us
 - **0.3** `usePinch`, guide rendering helpers, Vue bindings.
 - **1.0** API freeze.
 
-The full design, with the data behind these decisions, is in [RFC 001](https://github.com/frameable/frameable/blob/main/RFC-001-api.md).
+The full design, with the data behind these decisions, is in [RFC 001](https://github.com/KevinArce98/frameable/blob/main/RFC-001-api.md).
 
 ## License
 

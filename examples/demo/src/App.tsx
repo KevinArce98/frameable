@@ -258,7 +258,7 @@ export function App() {
               <ResetIcon />
             </button>
           </div>
-          <a className="btn btn--icon" href="https://github.com" aria-label="Source on GitHub">
+          <a className="btn btn--icon" href="https://github.com/KevinArce98/frameable" aria-label="Source on GitHub">
             <GithubIcon />
           </a>
           <button type="button" className="btn btn--primary topbar__cta" onClick={copyInstall}>

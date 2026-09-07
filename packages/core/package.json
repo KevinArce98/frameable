@@ -38,10 +38,10 @@
     "transform",
     "matrix"
   ],
-  "homepage": "https://github.com/frameable/frameable#readme",
+  "homepage": "https://github.com/KevinArce98/frameable#readme",
   "repository": {
     "type": "git",
-    "url": "https://github.com/frameable/frameable.git",
+    "url": "https://github.com/KevinArce98/frameable.git",
     "directory": "packages/core"
   }
 }
