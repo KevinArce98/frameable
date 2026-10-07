@@ -14,9 +14,11 @@ const initial: Item[] = [
 function Harness({
   start = initial,
   onTransaction,
+  nonUniformScale,
   expose,
 }: {
   start?: Item[];
+  nonUniformScale?: 'lock' | 'approximate';
   onTransaction?: (t: GroupTransaction) => void;
   expose: (group: UseGroupResult, items: Item[], setItems: (items: Item[]) => void) => void;
 }) {
@@ -32,6 +34,7 @@ function Harness({
         })
       ),
     ...(onTransaction ? { onTransaction } : {}),
+    ...(nonUniformScale ? { nonUniformScale } : {}),
   });
   expose(group, items, setItems);
   return (
@@ -41,7 +44,13 @@ function Harness({
   );
 }
 
-function setup(props: { start?: Item[]; onTransaction?: (t: GroupTransaction) => void } = {}) {
+function setup(
+  props: {
+    start?: Item[];
+    onTransaction?: (t: GroupTransaction) => void;
+    nonUniformScale?: 'lock' | 'approximate';
+  } = {}
+) {
   const state = {} as {
     group: UseGroupResult;
     items: Item[];
@@ -96,6 +105,12 @@ describe('useGroup', () => {
     expect(end.members[0]!.frame.x).toBe(1);
   });
 
+  it('adopts the rotation shared by every member', () => {
+    const shared = initial.map(item => ({ ...item, frame: { ...item.frame, rotation: 30 } }));
+    const { state } = setup({ start: shared });
+    expect(state.group.frame!.rotation).toBeCloseTo(30, 6);
+  });
+
   it('keeps the rotation of the group after a rotate transaction', () => {
     const { state, root } = setup();
     const pivot = center(state.group.frame!);
@@ -109,7 +124,8 @@ describe('useGroup', () => {
   });
 
   it('falls back to an unrotated frame when the items change outside the group', () => {
-    const { state, root } = setup();
+    const mixed: Item[] = [initial[0]!, { id: 'b', frame: { ...initial[1]!.frame, rotation: 20 } }];
+    const { state, root } = setup({ start: mixed });
     fireEvent.keyDown(root, { key: ']', ctrlKey: true, shiftKey: true });
     expect(state.group.frame!.rotation).toBeCloseTo(15, 6);
     act(() => {
@@ -165,5 +181,43 @@ describe('useGroup', () => {
       fireEvent.keyDown(window, { key: 'Escape' });
     });
     expect(state.items.map(item => item.frame)).toEqual(before.map(item => item.frame));
+  });
+
+  describe('non-uniform scale', () => {
+    const turned: Item[] = [
+      { id: 'a', frame: { x: 0, y: 0, width: 100, height: 50, rotation: 0 } },
+      { id: 'b', frame: { x: 200, y: 100, width: 60, height: 80, rotation: 20 } },
+    ];
+    const resizeFromKeyboard = (root: HTMLElement) =>
+      fireEvent.keyDown(root, { key: 'ArrowRight', altKey: true });
+
+    it('keeps the group ratio while a member is turned off the group axes', () => {
+      const { state, root } = setup({ start: turned });
+      const before = state.group.frame!;
+      resizeFromKeyboard(root);
+      const after = state.group.frame!;
+      expect(after.width).toBeGreaterThan(before.width);
+      expect(after.width / after.height).toBeCloseTo(before.width / before.height, 6);
+    });
+
+    it('lets the group stretch when asked to approximate', () => {
+      const { state, root } = setup({ start: turned, nonUniformScale: 'approximate' });
+      const before = state.group.frame!;
+      resizeFromKeyboard(root);
+      const after = state.group.frame!;
+      expect(after.width).toBeGreaterThan(before.width);
+      expect(after.width / after.height).not.toBeCloseTo(before.width / before.height, 3);
+    });
+
+    it('stretches freely when the members share the group rotation', () => {
+      const shared = turned.map(item => ({ ...item, frame: { ...item.frame, rotation: 20 } }));
+      const { state, root } = setup({ start: shared });
+      const before = state.group.frame!;
+      expect(before.rotation).toBeCloseTo(20, 6);
+      resizeFromKeyboard(root);
+      const after = state.group.frame!;
+      expect(after.width).toBeGreaterThan(before.width);
+      expect(after.width / after.height).not.toBeCloseTo(before.width / before.height, 3);
+    });
   });
 });
