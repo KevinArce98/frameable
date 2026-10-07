@@ -9,6 +9,7 @@ export default defineConfig({
   resolve: {
     alias: {
       'frameable-core': src('../../packages/core/src/index.ts'),
+      'frameable/transformer.css': src('../../packages/react/src/transformer.css'),
       frameable: src('../../packages/react/src/index.ts'),
     },
   },

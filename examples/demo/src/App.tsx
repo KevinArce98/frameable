@@ -1,8 +1,17 @@
 import { HANDLES, screenToSurface } from 'frameable-core';
-import type { Frame, Snapper, Transaction } from 'frameable-core';
-import { Surface, snapToGrid, toStyle, useFrame } from 'frameable';
-import type { SurfaceHandle } from 'frameable';
-import { useCallback, useMemo, useRef, useState } from 'react';
+import type { Frame, Guide, Snapper, Transaction } from 'frameable-core';
+import {
+  Surface,
+  Transformer,
+  snapToFrames,
+  snapToGrid,
+  toStyle,
+  useFrame,
+  useGroup,
+  useSelection,
+} from 'frameable';
+import type { PointerProps, SelectionItemProps, SurfaceHandle } from 'frameable';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { ChangeEvent, PointerEvent as ReactPointerEvent, ReactNode, WheelEvent } from 'react';
 import {
   CheckIcon,
@@ -82,18 +91,24 @@ function LayerContent({ item }: { item: Item }) {
 function Layer({
   item,
   selected,
-  onSelect,
+  showHandles,
+  itemProps,
+  groupDrag,
   onChange,
   onTransaction,
+  onGuides,
   snap,
   lockAspect,
 }: {
   item: Item;
   selected: boolean;
-  onSelect: (id: string) => void;
+  showHandles: boolean;
+  itemProps: SelectionItemProps;
+  groupDrag: PointerProps | null;
   onChange: (id: string, frame: Frame) => void;
   onTransaction: (t: Transaction) => void;
-  snap: Snapper | undefined;
+  onGuides: (id: string, guides: Guide[]) => void;
+  snap: Snapper | Snapper[] | undefined;
   lockAspect: boolean;
 }) {
   const change = useCallback((frame: Frame) => onChange(item.id, frame), [item.id, onChange]);
@@ -109,7 +124,9 @@ function Layer({
     ...(snap ? { snap } : {}),
     label: item.name,
   });
-  const drag = f.getDragProps();
+  useEffect(() => onGuides(item.id, f.guides), [item.id, f.guides, onGuides]);
+  useEffect(() => () => onGuides(item.id, []), [item.id, onGuides]);
+  const drag = groupDrag ?? f.getDragProps();
   const keyboard = f.getKeyboardProps();
   const live = f.transaction && f.transaction.phase === 'update' ? f.transaction : null;
 
@@ -126,18 +143,15 @@ function Layer({
       data-active={f.isActive}
       {...drag}
       {...keyboard}
-      onPointerDown={(event: ReactPointerEvent<HTMLDivElement>) => {
-        onSelect(item.id);
-        drag.onPointerDown(event);
-      }}
+      {...itemProps}
       style={{ ...toStyle(item.frame), ...drag.style }}
     >
       <LayerContent item={item} />
-      {selected &&
+      {showHandles &&
         HANDLES.map(handle => (
           <span key={handle} className="handle" {...f.getHandleProps(handle)} />
         ))}
-      {selected && <span className="rotate" {...f.getRotateProps()} />}
+      {showHandles && <span className="rotate" {...f.getRotateProps()} />}
       {badge && (
         <span
           className="badge"
@@ -206,19 +220,75 @@ function NumberField({
 
 export function App() {
   const [items, setItems] = useState(initialItems);
-  const [selected, setSelected] = useState<string | null>('card');
+  const [selected, setSelected] = useState<string[]>(['card']);
   const [zoom, setZoom] = useState(1);
   const [pan, setPan] = useState({ x: 0, y: 0 });
   const [cssZoom, setCssZoom] = useState(false);
   const [grid, setGrid] = useState(false);
   const [lockAspect, setLockAspect] = useState(false);
+  const [snapFrames, setSnapFrames] = useState(false);
+  const [layerGuides, setLayerGuides] = useState<Record<string, Guide[]>>({});
   const [log, setLog] = useState<Transaction[]>([]);
   const [pointer, setPointer] = useState<{ x: number; y: number } | null>(null);
   const [copied, setCopied] = useState(false);
   const [dragging, setDragging] = useState(false);
   const surface = useRef<SurfaceHandle>(null);
 
-  const snap = useMemo(() => (grid ? snapToGrid(24) : undefined), [grid]);
+  const snapFor = useCallback(
+    (excluded: readonly string[]): Snapper | Snapper[] | undefined => {
+      const list: Snapper[] = [];
+      if (grid) list.push(snapToGrid(24));
+      if (snapFrames) {
+        list.push(
+          snapToFrames(items.filter(item => !excluded.includes(item.id)).map(item => item.frame))
+        );
+      }
+      return list.length > 0 ? list : undefined;
+    },
+    [grid, snapFrames, items]
+  );
+
+  const sel = useSelection({
+    items,
+    selected,
+    onChange: setSelected,
+    getFrame: item => item.frame,
+    surface,
+  });
+
+  const selectedItems = useMemo(
+    () => items.filter(item => selected.includes(item.id)),
+    [items, selected]
+  );
+  const multiple = selectedItems.length > 1;
+  const groupSnap = useMemo(() => snapFor(selected), [snapFor, selected]);
+
+  const group = useGroup({
+    items: multiple ? selectedItems : [],
+    getFrame: item => item.frame,
+    onChange: updates =>
+      setItems(list => {
+        const byId = new Map(updates.map(update => [update.id, update.frame]));
+        return list.map(item => {
+          const frame = byId.get(item.id);
+          return frame ? { ...item, frame } : item;
+        });
+      }),
+    onTransaction: t => onTransaction(t),
+    constraints: { minWidth: 48, minHeight: 48 },
+    ...(groupSnap ? { snap: groupSnap } : {}),
+    label: 'Selection',
+  });
+
+  const onLayerGuides = useCallback((id: string, guides: Guide[]) => {
+    setLayerGuides(map =>
+      map[id] === guides || (!map[id] && guides.length === 0) ? map : { ...map, [id]: guides }
+    );
+  }, []);
+  const guides = useMemo(
+    () => [...Object.values(layerGuides).flat(), ...group.guides],
+    [layerGuides, group.guides]
+  );
 
   const onChange = useCallback((id: string, frame: Frame) => {
     setItems(list => list.map(item => (item.id === id ? { ...item, frame } : item)));
@@ -258,7 +328,7 @@ export function App() {
     }
   };
 
-  const current = items.find(item => item.id === selected);
+  const current = selectedItems.length === 1 ? selectedItems[0] : undefined;
   const updateCurrent = (patch: Partial<Frame>) => {
     if (current) onChange(current.id, { ...current.frame, ...patch });
   };
@@ -337,6 +407,12 @@ export function App() {
             onChange={setGrid}
           />
           <Toggle
+            label="Snap to layers"
+            hint="Edges and centers of the other layers"
+            checked={snapFrames}
+            onChange={setSnapFrames}
+          />
+          <Toggle
             label="Lock aspect ratio"
             hint="Same as holding shift while resizing"
             checked={lockAspect}
@@ -385,7 +461,9 @@ export function App() {
             </div>
           ) : (
             <p className="empty">
-              Select a layer to edit its frame. Every field writes straight to state.
+              {multiple
+                ? `${selectedItems.length} layers selected. Drag the outline to move, resize or rotate them together.`
+                : 'Select a layer to edit its frame. Drag on the canvas to marquee select, shift to add, alt to subtract.'}
             </p>
           )}
         </section>
@@ -448,10 +526,13 @@ export function App() {
       >
         <Surface
           ref={surface}
-          style={{ position: 'absolute', inset: 0, overflow: 'hidden' }}
           viewport={{ zoom, pan }}
-          onPointerDown={() => setSelected(null)}
-          onPointerMove={onPointerMove}
+          {...sel.getSurfaceProps()}
+          style={{ position: 'absolute', inset: 0, overflow: 'hidden', touchAction: 'none' }}
+          onPointerMove={event => {
+            sel.getSurfaceProps().onPointerMove(event);
+            onPointerMove(event);
+          }}
           onPointerLeave={() => setPointer(null)}
         >
           <div
@@ -462,12 +543,40 @@ export function App() {
               <Layer
                 key={item.id}
                 item={item}
-                selected={item.id === selected}
-                onSelect={setSelected}
+                selected={selected.includes(item.id)}
+                showHandles={selected.length === 1 && selected[0] === item.id}
+                itemProps={sel.getItemProps(item.id)}
+                groupDrag={multiple && selected.includes(item.id) ? group.getDragProps() : null}
                 onChange={onChange}
                 onTransaction={onTransaction}
-                snap={snap}
+                onGuides={onLayerGuides}
+                snap={snapFor([item.id])}
                 lockAspect={lockAspect}
+              />
+            ))}
+            {multiple && (
+              <Transformer {...group.getTransformerProps()} draggable={false} zoom={zoom} />
+            )}
+            {sel.marquee && <div className="marquee" style={toStyle(sel.marquee)} />}
+            {guides.map((guide, index) => (
+              <div
+                key={index}
+                className="guide"
+                style={
+                  guide.axis === 'x'
+                    ? {
+                        left: guide.position,
+                        top: guide.from,
+                        height: (guide.to ?? 0) - (guide.from ?? 0),
+                        width: 1 / zoom,
+                      }
+                    : {
+                        top: guide.position,
+                        left: guide.from,
+                        width: (guide.to ?? 0) - (guide.from ?? 0),
+                        height: 1 / zoom,
+                      }
+                }
               />
             ))}
           </div>
