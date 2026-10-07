@@ -53,6 +53,9 @@ export type SnapContext = {
   kind: TransactionKind;
   handle?: Handle;
   threshold: number;
+  source?: TransactionSource;
+  modifiers?: Modifiers;
+  initial?: Frame;
 };
 
 export type SnapResult = { frame: Frame; guides: Guide[] };
