@@ -1,6 +1,6 @@
 <p align="center">
   <strong>frameable</strong><br />
-  Headless drag, resize and rotate for React. Correct under any zoom.
+  Headless drag, resize, rotate and selection for React. Correct under any zoom.
 </p>
 
 <p align="center">
@@ -99,11 +99,13 @@ Pass your zoom and pan to `Surface` and every interaction resolves in surface un
 | `onTransaction`       | `(t) => void`          | Full lifecycle: `start`, `update`, `end`, `cancel` with `initial`, `frame`, `delta`, `modifiers`, `source` |
 | `constraints`         | `Constraints`          | `minWidth`, `minHeight`, `maxWidth`, `maxHeight`, `aspectRatio`, `bounds`, `operations`, `rotationStep`    |
 | `snap`                | `Snapper \| Snapper[]` | Composable snapping, see below                                                                             |
+| `snapThreshold`       | `number`               | Snap distance in screen pixels. Default `4`                                                                |
 | `disabled`            | `boolean`              | Removes all listeners, keeps props stable                                                                  |
 | `interactiveSelector` | `string \| false`      | Elements that should receive pointer events instead of starting a drag                                     |
+| `modifiers`           | `boolean`              | Set to `false` to turn off the Shift and Alt behaviors below                                               |
 | `label`               | `string`               | Accessible name for the frame                                                                              |
 
-Returns `{ frame, isActive, transaction, guides, getDragProps, getHandleProps, getRotateProps, getKeyboardProps }`. Spread the prop getters on your elements. Handles are named `n`, `ne`, `e`, `se`, `s`, `sw`, `w`, `nw`.
+Returns `{ frame, isActive, transaction, guides, cancel, getDragProps, getHandleProps, getRotateProps, getKeyboardProps }`. Spread the prop getters on your elements. Handles are named `n`, `ne`, `e`, `se`, `s`, `sw`, `w`, `nw`.
 
 ### Modifiers
 
@@ -204,31 +206,35 @@ Provides the coordinate system. Renders a `div`, accepts `viewport={{ zoom, pan 
 
 ### `frameable-core`
 
+```bash
+npm i frameable-core
+```
+
 Everything above is built on pure functions with no React and no DOM: `move`, `resize`, `rotate`, `applyBounds`, `runSnappers`, `groupBounds`, `applyToGroup`, `selectInMarquee`, `combineSelection`, viewport matrices and style helpers. Use it to build bindings for other frameworks or to precompute layouts on the server.
 
 ## Comparison
 
-|                             | Frameable            | react-moveable        | react-rnd    | @use-gesture/react    |
-| --------------------------- | -------------------- | --------------------- | ------------ | --------------------- |
-| Maintained                  | yes                  | no release since 2024 | slow         | no release since 2024 |
-| Controlled geometry         | yes                  | no                    | partial      | n/a                   |
-| Correct under zoomed parent | yes                  | no                    | no           | manual                |
-| Rotate                      | yes                  | yes                   | no           | manual                |
-| Snapping                    | function             | flags                 | grid only    | no                    |
-| Keyboard                    | yes                  | no                    | no           | no                    |
-| Headless                    | yes                  | no                    | no           | yes                   |
-| Size, min+gzip              | 5.1 kB + 3.6 kB core | 106 kB                | not measured | 8 kB                  |
+|                             | Frameable            | react-moveable | react-rnd    | @use-gesture/react |
+| --------------------------- | -------------------- | -------------- | ------------ | ------------------ |
+| Last release                | active               | Dec 2023       | Mar 2026     | Mar 2024           |
+| Controlled geometry         | yes                  | no             | partial      | n/a                |
+| Correct under zoomed parent | yes                  | no             | no           | manual             |
+| Rotate                      | yes                  | yes            | no           | manual             |
+| Snapping                    | function             | flags          | grid only    | no                 |
+| Keyboard                    | yes                  | no             | no           | no                 |
+| Headless                    | yes                  | no             | no           | yes                |
+| Size, min+gzip              | 5.1 kB + 3.6 kB core | 106 kB         | not measured | 8 kB               |
 
 Frameable is complementary to `@dnd-kit/react` and `pragmatic-drag-and-drop`. Use those when the question is "where in this list does this go". Use Frameable when the question is "what are the coordinates of this thing now".
 
 ## Roadmap
 
-- **0.1** `useFrame`, `Surface`, `snapToGrid`, keyboard. Replaces `react-rnd`.
-- **0.2** (done) `useSelection`, `useGroup`, `snapToFrames`, styled `Transformer`. Replaces `react-moveable` and `react-selecto`.
+- **0.1** (released) `useFrame`, `Surface`, `snapToGrid`, keyboard. Replaces `react-rnd`.
+- **0.2** (released) `useSelection`, `useGroup`, `snapToFrames`, styled `Transformer`. Replaces `react-moveable` and `react-selecto`.
 - **0.3** `usePinch`, guide rendering helpers, Vue bindings.
 - **1.0** API freeze.
 
-The full design, with the data behind these decisions, is in [RFC 001](https://github.com/KevinArce98/frameable/blob/main/RFC-001-api.md).
+The original design, with the data behind these decisions, is in [RFC 001](https://github.com/KevinArce98/frameable/blob/main/RFC-001-api.md). Its implementation status section lists where the shipped API differs.
 
 ## License
 
@@ -238,10 +244,11 @@ MIT
 
 ```bash
 pnpm install
-pnpm test
+pnpm test:run
+pnpm lint
 pnpm typecheck
 pnpm build
 pnpm dev
 ```
 
-`pnpm dev` starts the demo in `examples/demo`: a dark canvas with viewport zoom and pan, an optional CSS `zoom` on the parent, grid snapping, a live frame inspector and the transaction log.
+`pnpm dev` starts the demo in `examples/demo`: a dark canvas with viewport zoom and pan, an optional CSS `zoom` on the parent, grid and layer snapping, marquee selection, a group transformer, a live frame inspector and the transaction log.

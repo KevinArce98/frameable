@@ -1,8 +1,23 @@
 # RFC 001: Frameable — direct-manipulation primitives for React
 
-- Status: Draft, open for comments
-- Working name: `frameable` (name is a placeholder)
+- Status: Implemented through 0.2 with the changes listed in [Implementation status](#implementation-status). The rest is still a draft.
+- Name: `frameable` (final)
 - Scope of this RFC: public API of v1. Implementation details are out of scope unless they constrain the API.
+
+## Implementation status
+
+Shipped in 0.1 and 0.2: `useFrame`, `Surface`, `toStyle`, `toSVGTransform`, `snapToGrid`, `snapToFrames`, `useSelection`, `useGroup`, `Transformer`, `frameable-core`.
+
+Where the shipped API differs from the sections below:
+
+- **`useGroup`** takes `items`, `getFrame` and `getId` instead of `frames`, calls `onChange` with `{ id, frame }[]`, and adds `nonUniformScale`. It calls `useFrame` internally and returns its prop getters. The group transaction carries per-member `members`.
+- **`Transformer`** accepts a `controller` (the result of `useGroup`) besides `frame` and `onChange`, and takes a `zoom` prop. Its CSS ships as `frameable/transformer.css`.
+- **`useSelection`** takes `items`, `getFrame` and `getId`, and adds `surface`, `viewport`, `onTransaction` and `interactiveSelector`.
+- **`SnapContext`** is `{ kind, handle, threshold, source, modifiers, initial }`, not `{ transaction, surface, threshold }`. `snapThreshold` is in screen pixels. Keyboard nudges are not snapped.
+- **`Constraints.bounds`** is a `Frame`. The `'parent'` form is not implemented.
+- **`getKeyboardProps`** does not start a keyboard transaction on `Enter`.
+
+Not shipped yet: `snapToBounds`, `useAnnouncer`, `surface.invalidate()`, remapping modifiers per interaction, `usePinch`, Vue bindings.
 
 ## Summary
 
