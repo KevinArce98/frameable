@@ -125,12 +125,12 @@ Same semantics as Figma, on by default.
 ### Snapping
 
 ```tsx
-import { snapToGrid } from 'frameable';
+import { snapToFrames, snapToGrid } from 'frameable';
 
-useFrame({ frame, onChange, snap: snapToGrid(8) });
+useFrame({ frame, onChange, snap: [snapToGrid(8), snapToFrames(otherFrames)] });
 ```
 
-A custom snapper is a pure function. Return `null` to pass through.
+`snapThreshold` is in screen pixels, converted to surface units through the current zoom. Keyboard nudges are never snapped. `snapToFrames(frames, { edges, centers })` aligns edges and centers to other frames and returns the guides to draw. A snap that would break `minWidth`, `maxHeight`, `bounds` or a locked aspect ratio is discarded. A custom snapper is a pure function. Return `null` to pass through.
 
 ```ts
 const snapToBaseline: Snapper = (candidate, ctx) => {
@@ -140,13 +140,71 @@ const snapToBaseline: Snapper = (candidate, ctx) => {
 };
 ```
 
+### `useSelection(options)`
+
+Marquee and click selection over any set of frames. It reads frames through `getFrame`, never the DOM, so virtualized and off-screen items are selectable.
+
+```tsx
+const surface = useRef<SurfaceHandle>(null);
+
+const sel = useSelection({
+  items,
+  selected,
+  onChange: setSelected,
+  getFrame: item => item.frame,
+  mode: 'intersect',
+  surface,
+});
+
+<Surface ref={surface} {...sel.getSurfaceProps()}>
+  {items.map(item => (
+    <Box key={item.id} {...sel.getItemProps(item.id)} />
+  ))}
+  {sel.marquee && <div style={toStyle(sel.marquee)} />}
+</Surface>;
+```
+
+| Option                | Description                                                                                             |
+| --------------------- | ------------------------------------------------------------------------------------------------------- |
+| `mode`                | `'intersect'` (default) or `'contain'`                                                                  |
+| `getId`               | Required unless items have a string `id`                                                                |
+| `surface`, `viewport` | Resolve the marquee through the `Surface` zoom and pan. Pass the `Surface` ref, or `viewport` alone     |
+| `onTransaction`       | `select` lifecycle (`start`, `update`, `end`, `cancel`) so history can coalesce a marquee into one step |
+| `interactiveSelector` | Presses on matching elements never start a marquee. Same default as `useFrame`                          |
+
+`Shift` + click toggles, `Shift` + drag adds, `Alt` + drag subtracts, `Escape` restores the previous selection. `getSurfaceProps(userProps)` and `getItemProps(id, userProps)` compose with your own handlers and `style`.
+
+### `useGroup(options)` and `Transformer`
+
+`useGroup` turns N items into one transformable frame and applies every change back to them. It calls `useFrame` internally, so it returns the same prop getters (`getDragProps`, `getHandleProps`, `getRotateProps`, `getKeyboardProps`) plus `frame`, `guides` and `isActive`. `Transformer` is the one styled component, built on the same controller.
+
+```tsx
+import 'frameable/transformer.css';
+
+const group = useGroup({
+  items: selectedItems,
+  getFrame: item => item.frame,
+  onChange: updates => updateMany(updates),
+  snap: snapToFrames(otherFrames),
+});
+
+<Transformer {...group.getTransformerProps()} draggable={false} zoom={zoom} />;
+```
+
+- `onChange` receives `{ id, frame }[]`. `onTransaction` receives the group transaction plus `members`, one `{ id, initial, frame }` per item, so undo and sync get per-member before and after values.
+- `group.frame` is `null` for an empty selection. It keeps its rotation after a transaction for as long as the items stay where the group left them, so repeated rotation pivots around the same point. If the items change from outside, it falls back to an unrotated bounding box.
+- To drag the group from the members themselves, spread `group.getDragProps()` on each selected member and render `<Transformer draggable={false} />`. Members stay clickable and `Shift` + click keeps working.
+- `constraints` apply to the group box, not to each member.
+- Members scale with the group along their own axes. A member turned by a multiple of 90° stays exact. A member at another angle under a non-uniform scale is approximated, since a rotated rectangle cannot represent the shear.
+- `Transformer` also works alone with `frame` and `onChange`, accepts every `useFrame` option plus `handles`, `rotate`, `draggable`, `zoom`, `className` and `onGuidesChange`. Pass the viewport `zoom` so handles and outline keep their on-screen size. Style it with `--frameable-color` and `--frameable-handle-size`.
+
 ### `Surface`
 
 Provides the coordinate system. Renders a `div`, accepts `viewport={{ zoom, pan }}` and any div props. Exposes `getMatrix()` through its ref so you can convert pointer positions yourself.
 
 ### `frameable-core`
 
-Everything above is built on pure functions with no React and no DOM: `move`, `resize`, `rotate`, `applyBounds`, `runSnappers`, viewport matrices and style helpers. Use it to build bindings for other frameworks or to precompute layouts on the server.
+Everything above is built on pure functions with no React and no DOM: `move`, `resize`, `rotate`, `applyBounds`, `runSnappers`, `groupBounds`, `applyToGroup`, `selectInMarquee`, `combineSelection`, viewport matrices and style helpers. Use it to build bindings for other frameworks or to precompute layouts on the server.
 
 ## Comparison
 
@@ -166,7 +224,7 @@ Frameable is complementary to `@dnd-kit/react` and `pragmatic-drag-and-drop`. Us
 ## Roadmap
 
 - **0.1** `useFrame`, `Surface`, `snapToGrid`, keyboard. Replaces `react-rnd`.
-- **0.2** `useSelection`, `useGroup`, `snapToFrames`, styled `Transformer`. Replaces `react-moveable` and `react-selecto`.
+- **0.2** (done) `useSelection`, `useGroup`, `snapToFrames`, styled `Transformer`. Replaces `react-moveable` and `react-selecto`.
 - **0.3** `usePinch`, guide rendering helpers, Vue bindings.
 - **1.0** API freeze.
 

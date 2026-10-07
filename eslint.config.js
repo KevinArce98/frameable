@@ -6,7 +6,7 @@ import tsparser from '@typescript-eslint/parser';
 
 export default defineConfig([
   {
-    ignores: ['**/dist/', '**/node_modules/', '**/*.js', 'coverage/'],
+    ignores: ['**/dist/', '**/node_modules/', '**/*.js', '**/tsup.config.ts', '**/vitest.config.ts', 'coverage/'],
   },
   {
     files: ['**/*.{ts,tsx}'],

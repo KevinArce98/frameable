@@ -1,0 +1,81 @@
+.frameable-transformer {
+  --frameable-color: #3b82f6;
+  --frameable-handle-size: 10px;
+  --frameable-zoom: 1;
+  --frameable-size: calc(var(--frameable-handle-size) / var(--frameable-zoom));
+  --frameable-line: calc(1px / var(--frameable-zoom));
+  box-sizing: border-box;
+  outline: var(--frameable-line) solid var(--frameable-color);
+  outline-offset: calc(var(--frameable-line) * -1);
+  user-select: none;
+}
+
+.frameable-transformer:focus-visible {
+  outline-width: calc(2px / var(--frameable-zoom));
+}
+
+.frameable-handle {
+  position: absolute;
+  box-sizing: border-box;
+  width: var(--frameable-size);
+  height: var(--frameable-size);
+  margin: calc(var(--frameable-size) / -2) 0 0 calc(var(--frameable-size) / -2);
+  background: #fff;
+  border: var(--frameable-line) solid var(--frameable-color);
+  border-radius: calc(2px / var(--frameable-zoom));
+}
+
+.frameable-handle--n {
+  top: 0;
+  left: 50%;
+  cursor: ns-resize;
+}
+.frameable-handle--s {
+  top: 100%;
+  left: 50%;
+  cursor: ns-resize;
+}
+.frameable-handle--e {
+  top: 50%;
+  left: 100%;
+  cursor: ew-resize;
+}
+.frameable-handle--w {
+  top: 50%;
+  left: 0;
+  cursor: ew-resize;
+}
+.frameable-handle--ne {
+  top: 0;
+  left: 100%;
+  cursor: nesw-resize;
+}
+.frameable-handle--sw {
+  top: 100%;
+  left: 0;
+  cursor: nesw-resize;
+}
+.frameable-handle--nw {
+  top: 0;
+  left: 0;
+  cursor: nwse-resize;
+}
+.frameable-handle--se {
+  top: 100%;
+  left: 100%;
+  cursor: nwse-resize;
+}
+
+.frameable-rotate {
+  position: absolute;
+  top: calc(-28px / var(--frameable-zoom));
+  left: 50%;
+  box-sizing: border-box;
+  width: var(--frameable-size);
+  height: var(--frameable-size);
+  margin-left: calc(var(--frameable-size) / -2);
+  background: #fff;
+  border: var(--frameable-line) solid var(--frameable-color);
+  border-radius: 50%;
+  cursor: grab;
+}

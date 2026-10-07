@@ -8,6 +8,7 @@ import {
   resize,
   rotate,
   runSnappers,
+  satisfiesConstraints,
   screenToSurface,
 } from 'frameable-core';
 import type {
@@ -26,6 +27,7 @@ import type {
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { CSSProperties, KeyboardEvent, PointerEvent } from 'react';
 import { useSurface } from './Surface';
+import { useLatest } from './useLatest';
 
 export type UseFrameOptions = {
   frame: Frame;
@@ -63,11 +65,14 @@ export type UseFrameResult = {
   isActive: boolean;
   transaction: Transaction | null;
   guides: Guide[];
+  cancel: () => void;
   getDragProps: () => PointerProps;
   getHandleProps: (handle: Handle) => PointerProps;
   getRotateProps: () => PointerProps;
   getKeyboardProps: () => KeyboardProps;
 };
+
+export type FrameController = Omit<UseFrameResult, 'frame'> & { frame: Frame | null };
 
 type Session = {
   id: string;
@@ -83,7 +88,7 @@ type Session = {
   raf: number;
 };
 
-const DEFAULT_INTERACTIVE =
+export const DEFAULT_INTERACTIVE =
   'input, textarea, select, button, a, [contenteditable], [data-frameable-ignore]';
 
 let transactionCounter = 0;
@@ -93,7 +98,7 @@ function nextId(): string {
   return `t${transactionCounter}`;
 }
 
-function readModifiers(event: {
+export function readModifiers(event: {
   shiftKey: boolean;
   altKey: boolean;
   metaKey: boolean;
@@ -108,16 +113,18 @@ function allowed(constraints: Constraints | undefined, operation: Operation): bo
 
 export function useFrame(options: UseFrameOptions): UseFrameResult {
   const surface = useSurface();
-  const latest = useRef(options);
-  latest.current = options;
+  const latest = useLatest(options);
 
   const session = useRef<Session | null>(null);
   const [transaction, setTransaction] = useState<Transaction | null>(null);
   const [guides, setGuides] = useState<Guide[]>([]);
 
-  const emit = useCallback((t: Transaction) => {
-    latest.current.onTransaction?.(t);
-  }, []);
+  const emit = useCallback(
+    (t: Transaction) => {
+      latest.current.onTransaction?.(t);
+    },
+    [latest]
+  );
 
   const compute = useCallback(
     (s: Session, point: Point, modifiers: Modifiers): { frame: Frame; guides: Guide[] } => {
@@ -132,10 +139,14 @@ export function useFrame(options: UseFrameOptions): UseFrameResult {
         : { shift: false, alt: false, meta: false, ctrl: false };
       const delta = { x: point.x - s.start.x, y: point.y - s.start.y };
       let frame: Frame;
+      let lockedRatio: number | undefined;
       if (s.kind === 'move') {
         frame = applyBounds(move(s.initial, delta, { axisLock: mods.shift }), constraints?.bounds);
       } else if (s.kind === 'resize' && s.handle) {
         const ratio = constraints?.aspectRatio;
+        const preserve = mods.shift || ratio === 'preserve';
+        if (typeof ratio === 'number') lockedRatio = ratio;
+        else if (preserve && s.initial.height > 0) lockedRatio = s.initial.width / s.initial.height;
         frame = resize(s.initial, {
           handle: s.handle,
           delta,
@@ -153,13 +164,21 @@ export function useFrame(options: UseFrameOptions): UseFrameResult {
         const step = mods.shift ? 15 : constraints?.rotationStep;
         frame = rotate(s.initial, step === undefined ? { to } : { to, step });
       }
-      return runSnappers(frame, snap, {
+      const scale = Math.hypot(s.matrix.a, s.matrix.b) || 1;
+      const snapped = runSnappers(frame, snap, {
         kind: s.kind,
         ...(s.handle ? { handle: s.handle } : {}),
-        threshold: snapThreshold ?? 4,
+        threshold: (snapThreshold ?? 4) / scale,
+        source: 'pointer',
+        modifiers: mods,
+        initial: s.initial,
       });
+      if (snapped.frame === frame || s.kind === 'rotate') return snapped;
+      return satisfiesConstraints(snapped.frame, constraints, lockedRatio)
+        ? snapped
+        : { frame, guides: [] };
     },
-    []
+    [latest]
   );
 
   const flush = useCallback(() => {
@@ -349,10 +368,8 @@ export function useFrame(options: UseFrameOptions): UseFrameResult {
 
   const keyboardTransaction = useCallback(
     (kind: Operation, next: Frame, modifiers: Modifiers) => {
-      const { frame, constraints, snap, snapThreshold } = latest.current;
-      const snapped = runSnappers(next, snap, { kind, threshold: snapThreshold ?? 4 });
-      const bounded =
-        kind === 'rotate' ? snapped.frame : applyBounds(snapped.frame, constraints?.bounds);
+      const { frame, constraints } = latest.current;
+      const bounded = kind === 'rotate' ? next : applyBounds(next, constraints?.bounds);
       const id = nextId();
       const source: TransactionSource = 'keyboard';
       const base = { id, kind, initial: frame, modifiers, source };
@@ -361,11 +378,12 @@ export function useFrame(options: UseFrameOptions): UseFrameResult {
       emit({ ...base, phase: 'update', frame: bounded, delta: frameDelta(frame, bounded) });
       emit({ ...base, phase: 'end', frame: bounded, delta: frameDelta(frame, bounded) });
     },
-    [emit]
+    [emit, latest]
   );
 
   const onKeyDown = useCallback(
     (event: KeyboardEvent<Element>) => {
+      if (event.target !== event.currentTarget) return;
       const { disabled, frame, constraints } = latest.current;
       if (disabled || session.current) return;
       const modifiers = readModifiers(event);
@@ -408,19 +426,21 @@ export function useFrame(options: UseFrameOptions): UseFrameResult {
         );
       }
     },
-    [keyboardTransaction]
+    [keyboardTransaction, latest]
   );
 
   const getKeyboardProps = useCallback(
     (): KeyboardProps => ({
       tabIndex: 0,
       role: 'group',
-      'aria-label': latest.current.label ?? 'Frame',
+      'aria-label': options.label ?? 'Frame',
       'aria-roledescription': 'movable frame',
       onKeyDown,
     }),
-    [onKeyDown]
+    [onKeyDown, options.label]
   );
+
+  const cancel = useCallback(() => finish('cancel'), [finish]);
 
   return useMemo(
     () => ({
@@ -428,6 +448,7 @@ export function useFrame(options: UseFrameOptions): UseFrameResult {
       isActive: active,
       transaction,
       guides,
+      cancel,
       getDragProps,
       getHandleProps,
       getRotateProps,
@@ -438,6 +459,7 @@ export function useFrame(options: UseFrameOptions): UseFrameResult {
       active,
       transaction,
       guides,
+      cancel,
       getDragProps,
       getHandleProps,
       getRotateProps,
