@@ -1,3 +1,10 @@
+## [0.2.1](https://github.com/KevinArce98/frameable/compare/v0.2.0...v0.2.1) (2026-10-07)
+
+
+### Bug Fixes
+
+* **core:** extend snap guides across every aligned frame ([d181b93](https://github.com/KevinArce98/frameable/commit/d181b938cd5646369f97273f37f417cf99289368))
+
 # [0.2.0](https://github.com/KevinArce98/frameable/compare/v0.1.0...v0.2.0) (2026-10-07)
 
 
