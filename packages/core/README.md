@@ -55,6 +55,24 @@ const { frame, guides } = runSnappers(candidate, [snapToGrid(8)], { kind: 'move'
 applyBounds(frame, { x: 0, y: 0, width: 1200, height: 800, rotation: 0 });
 ```
 
+`snapToFrames(frames, { edges, centers })` is a snapper that aligns to other frames and returns guides.
+
+## Groups and selection
+
+```ts
+import { groupBounds, applyToGroup, marqueeFrame, selectInMarquee } from 'frameable-core';
+
+const group = groupBounds(frames);
+const next = applyToGroup(frames, group, { ...group, rotation: 30 });
+
+const hits = selectInMarquee(items, marqueeFrame(start, end), item => item.frame, 'intersect');
+const selected = combineSelection(
+  previous,
+  hits.map(item => item.id),
+  { shift: true }
+);
+```
+
 ## Geometry helpers
 
 `center`, `corners`, `aabb`, `handlePosition`, `localToSurface`, `surfaceToLocal`, `pointerAngle`, `normalizeAngle`, `frameDelta`, `toStyle`, `toSVGTransform`.
