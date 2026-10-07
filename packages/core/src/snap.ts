@@ -89,13 +89,21 @@ function nearest(
   return best;
 }
 
-function guideFor(axis: 'x' | 'y', target: Target, spanFrom: number, spanTo: number): Guide {
-  return {
-    axis,
-    position: target.position,
-    from: Math.min(target.from, spanFrom),
-    to: Math.max(target.to, spanTo),
-  };
+function guideFor(
+  axis: 'x' | 'y',
+  target: Target,
+  candidates: Target[],
+  spanFrom: number,
+  spanTo: number
+): Guide {
+  let from = Math.min(target.from, spanFrom);
+  let to = Math.max(target.to, spanTo);
+  for (const other of candidates) {
+    if (Math.abs(other.position - target.position) > 1e-9) continue;
+    from = Math.min(from, other.from);
+    to = Math.max(to, other.to);
+  }
+  return { axis, position: target.position, from, to };
 }
 
 export function snapToFrames(frames: Frame[], options: SnapToFramesOptions = {}): Snapper {
@@ -119,8 +127,8 @@ export function snapToFrames(frames: Frame[], options: SnapToFramesOptions = {})
       const dy = snapY?.offset ?? 0;
       const moved = { x: box.x + dx, y: box.y + dy, w: box.width, h: box.height };
       const guides: Guide[] = [];
-      if (snapX) guides.push(guideFor('x', snapX.target, moved.y, moved.y + moved.h));
-      if (snapY) guides.push(guideFor('y', snapY.target, moved.x, moved.x + moved.w));
+      if (snapX) guides.push(guideFor('x', snapX.target, targets.x, moved.y, moved.y + moved.h));
+      if (snapY) guides.push(guideFor('y', snapY.target, targets.y, moved.x, moved.x + moved.w));
       return { frame: { ...candidate, x: candidate.x + dx, y: candidate.y + dy }, guides };
     }
     if (
@@ -155,8 +163,8 @@ export function snapToFrames(frames: Frame[], options: SnapToFramesOptions = {})
       }
       if (next.width <= 0 || next.height <= 0) return null;
       const guides: Guide[] = [];
-      if (snapX) guides.push(guideFor('x', snapX.target, next.y, next.y + next.height));
-      if (snapY) guides.push(guideFor('y', snapY.target, next.x, next.x + next.width));
+      if (snapX) guides.push(guideFor('x', snapX.target, targets.x, next.y, next.y + next.height));
+      if (snapY) guides.push(guideFor('y', snapY.target, targets.y, next.x, next.x + next.width));
       return { frame: next, guides };
     }
     return null;

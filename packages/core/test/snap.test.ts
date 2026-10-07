@@ -38,6 +38,16 @@ describe('snapToFrames on move', () => {
   });
 });
 
+describe('snapToFrames guides', () => {
+  it('spans every frame aligned at the snapped position', () => {
+    const above: Frame = { x: 200, y: 0, width: 40, height: 30, rotation: 0 };
+    const snap = snapToFrames([other, above]);
+    const candidate: Frame = { x: 198, y: 400, width: 50, height: 50, rotation: 0 };
+    const result = snap(candidate, moveCtx)!;
+    expect(result.guides).toEqual([{ axis: 'x', position: 200, from: 0, to: 450 }]);
+  });
+});
+
 describe('snapToFrames on resize', () => {
   const snap = snapToFrames([other]);
 
