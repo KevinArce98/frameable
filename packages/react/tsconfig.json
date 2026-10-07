@@ -5,5 +5,5 @@
       "frameable-core": ["../core/src/index.ts"]
     }
   },
-  "include": ["src"]
+  "include": ["src", "test"]
 }
