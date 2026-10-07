@@ -399,9 +399,12 @@ export function useFrame(options: UseFrameOptions): UseFrameResult {
         event.preventDefault();
         if (modifiers.alt) {
           if (!allowed(constraints, 'resize')) return;
+          const ratio = constraints?.aspectRatio;
           const next = resize(frame, {
             handle: 'se',
             delta: arrow,
+            ...(ratio === 'preserve' ? { preserveAspect: true } : {}),
+            ...(typeof ratio === 'number' ? { aspectRatio: ratio } : {}),
             ...(constraints?.minWidth !== undefined ? { minWidth: constraints.minWidth } : {}),
             ...(constraints?.minHeight !== undefined ? { minHeight: constraints.minHeight } : {}),
             ...(constraints?.maxWidth !== undefined ? { maxWidth: constraints.maxWidth } : {}),

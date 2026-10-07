@@ -1,5 +1,11 @@
 'use client';
-import { applyToGroup, framesEqual, groupBounds } from 'frameable-core';
+import {
+  applyToGroup,
+  framesEqual,
+  groupBounds,
+  groupScaleIsExact,
+  sharedRotation,
+} from 'frameable-core';
 import type { Frame, Transaction } from 'frameable-core';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useFrame } from './useFrame';
@@ -15,6 +21,7 @@ export type GroupTransaction = Transaction & { members: GroupMemberChange[] };
 type GroupOptionsBase<T> = Omit<UseFrameOptions, 'frame' | 'onChange' | 'onTransaction'> & {
   items: readonly T[];
   getFrame: (item: T) => Frame;
+  nonUniformScale?: 'lock' | 'approximate';
   onChange: (updates: GroupUpdate[]) => void;
   onTransaction?: (transaction: GroupTransaction) => void;
 };
@@ -68,6 +75,7 @@ export function useGroup<T>(options: UseGroupOptions<T>): UseGroupResult {
     items,
     getFrame,
     getId: customGetId,
+    nonUniformScale = 'lock',
     onChange: ignoredOnChange,
     onTransaction: ignoredOnTransaction,
     ...frameOptions
@@ -93,7 +101,7 @@ export function useGroup<T>(options: UseGroupOptions<T>): UseGroupResult {
       framesEqual(member.frame, settled.frames[index] as Frame, SETTLE_EPSILON)
     )
       ? settled.rotation
-      : 0;
+      : sharedRotation(members.map(member => member.frame));
 
   const bounds = useMemo(
     () =>
@@ -104,6 +112,24 @@ export function useGroup<T>(options: UseGroupOptions<T>): UseGroupResult {
     [members, rotation]
   );
   const frame = live ?? bounds;
+
+  const exactScale = useMemo(
+    () =>
+      bounds === null ||
+      groupScaleIsExact(
+        members.map(member => member.frame),
+        bounds
+      ),
+    [members, bounds]
+  );
+  const lockRatio = nonUniformScale === 'lock' && !exactScale;
+  const constraints = useMemo(() => {
+    if (!lockRatio) return frameOptions.constraints;
+    return {
+      ...frameOptions.constraints,
+      aspectRatio: frameOptions.constraints?.aspectRatio ?? 'preserve',
+    } as const;
+  }, [lockRatio, frameOptions.constraints]);
 
   const handleChange = useCallback(
     (next: Frame) => {
@@ -156,6 +182,7 @@ export function useGroup<T>(options: UseGroupOptions<T>): UseGroupResult {
 
   const result = useFrame({
     ...frameOptions,
+    ...(constraints ? { constraints } : {}),
     frame: frame ?? EMPTY_FRAME,
     disabled: frameOptions.disabled || frame === null,
     onChange: handleChange,
