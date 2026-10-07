@@ -195,7 +195,7 @@ const group = useGroup({
 - `group.frame` is `null` for an empty selection. It keeps its rotation after a transaction for as long as the items stay where the group left them, so repeated rotation pivots around the same point. If the items change from outside, it falls back to an unrotated bounding box.
 - To drag the group from the members themselves, spread `group.getDragProps()` on each selected member and render `<Transformer draggable={false} />`. Members stay clickable and `Shift` + click keeps working.
 - `constraints` apply to the group box, not to each member.
-- Members scale with the group along their own axes. A member turned by a multiple of 90° stays exact. A member at another angle under a non-uniform scale is approximated, since a rotated rectangle cannot represent the shear.
+- A `Frame` cannot represent shear, so a non-uniform scale is only exact for members aligned to the group axes in quarter turns. `nonUniformScale` decides what happens otherwise. `'lock'` (default) keeps the aspect ratio of the group while any member is turned off the group axes, so every resize stays exact. `'approximate'` allows free resizing and fits each turned member to its stretched axis, keeping its area. When all members share one rotation, the group adopts it and resizes freely and exactly.
 - `Transformer` also works alone with `frame` and `onChange`, accepts every `useFrame` option plus `handles`, `rotate`, `draggable`, `zoom`, `className` and `onGuidesChange`. Pass the viewport `zoom` so handles and outline keep their on-screen size. Style it with `--frameable-color` and `--frameable-handle-size`.
 
 ### `Surface`
@@ -217,7 +217,7 @@ Everything above is built on pure functions with no React and no DOM: `move`, `r
 | Snapping                    | function             | flags                 | grid only    | no                    |
 | Keyboard                    | yes                  | no                    | no           | no                    |
 | Headless                    | yes                  | no                    | no           | yes                   |
-| Size, min+gzip              | 3.3 kB + 2.9 kB core | 106 kB                | not measured | 8 kB                  |
+| Size, min+gzip              | 5.1 kB + 3.6 kB core | 106 kB                | not measured | 8 kB                  |
 
 Frameable is complementary to `@dnd-kit/react` and `pragmatic-drag-and-drop`. Use those when the question is "where in this list does this go". Use Frameable when the question is "what are the coordinates of this thing now".
 
