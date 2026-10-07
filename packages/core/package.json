@@ -1,6 +1,6 @@
 {
   "name": "frameable-core",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Framework-agnostic math for dragging, resizing and rotating frames on a 2D surface",
   "type": "module",
   "sideEffects": false,
