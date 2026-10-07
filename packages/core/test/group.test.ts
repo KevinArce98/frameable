@@ -1,5 +1,13 @@
 import { describe, expect, it } from 'vitest';
-import { applyToGroup, center, groupBounds, localToSurface, surfaceToLocal } from '../src';
+import {
+  applyToGroup,
+  center,
+  groupBounds,
+  groupScaleIsExact,
+  localToSurface,
+  sharedRotation,
+  surfaceToLocal,
+} from '../src';
 import type { Frame } from '../src';
 
 const a: Frame = { x: 0, y: 0, width: 100, height: 50, rotation: 0 };
@@ -132,5 +140,58 @@ describe('applyToGroup with a rotated group', () => {
     const next = applyToGroup([a, b], group, { ...group });
     expect(next[0]).toBe(a);
     expect(next[1]).toBe(b);
+  });
+});
+
+describe('applyToGroup with a member turned off the group axes', () => {
+  const turned: Frame = { x: 0, y: 0, width: 100, height: 40, rotation: 45 };
+  const bounds = groupBounds([turned])!;
+
+  it('follows the stretched axis and keeps the sheared area', () => {
+    const [next] = applyToGroup([turned], bounds, { ...bounds, width: bounds.width * 2 });
+    const axis = { x: 2 * 100 * Math.SQRT1_2, y: 100 * Math.SQRT1_2 };
+    expect(next!.width).toBeCloseTo(Math.hypot(axis.x, axis.y), 9);
+    expect(next!.rotation).toBeCloseTo((Math.atan2(axis.y, axis.x) * 180) / Math.PI, 9);
+    expect(next!.width * next!.height).toBeCloseTo(2 * 100 * 40, 9);
+  });
+
+  it('stays exact under a uniform scale', () => {
+    const [next] = applyToGroup([turned], bounds, {
+      ...bounds,
+      width: bounds.width * 2,
+      height: bounds.height * 2,
+    });
+    expect(next!.width).toBeCloseTo(200, 9);
+    expect(next!.height).toBeCloseTo(80, 9);
+    expect(next!.rotation).toBeCloseTo(45, 9);
+  });
+});
+
+describe('groupScaleIsExact', () => {
+  const group: Frame = { x: 0, y: 0, width: 100, height: 100, rotation: 30 };
+
+  it('accepts members aligned to the group axes in quarter turns', () => {
+    const aligned = [30, 120, -60, 210].map(rotation => ({ ...a, rotation }));
+    expect(groupScaleIsExact(aligned, group)).toBe(true);
+  });
+
+  it('rejects members at any other angle', () => {
+    expect(groupScaleIsExact([{ ...a, rotation: 36 }], group)).toBe(false);
+  });
+});
+
+describe('sharedRotation', () => {
+  it('returns the common rotation of the frames', () => {
+    expect(
+      sharedRotation([
+        { ...a, rotation: 20 },
+        { ...b, rotation: 20 },
+      ])
+    ).toBe(20);
+  });
+
+  it('returns 0 when the frames disagree or are empty', () => {
+    expect(sharedRotation([{ ...a, rotation: 20 }, b])).toBe(0);
+    expect(sharedRotation([])).toBe(0);
   });
 });

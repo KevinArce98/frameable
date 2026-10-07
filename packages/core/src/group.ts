@@ -60,21 +60,44 @@ export function applyToGroup(members: readonly Frame[], from: Frame, to: Frame):
   if (framesEqual(from, to)) return [...members];
   const scaleX = from.width === 0 ? 1 : to.width / from.width;
   const scaleY = from.height === 0 ? 1 : to.height / from.height;
-  const rotationDelta = to.rotation - from.rotation;
   return members.map(member => {
     const local = surfaceToLocal(from, center(member));
     const nextCenter = localToSurface(to, { x: local.x * scaleX, y: local.y * scaleY });
     const relative = (member.rotation - from.rotation) * DEG;
     const cos = Math.cos(relative);
     const sin = Math.sin(relative);
-    const width = member.width * Math.hypot(scaleX * cos, scaleY * sin);
-    const height = member.height * Math.hypot(scaleX * sin, scaleY * cos);
+    const axisX = { x: scaleX * member.width * cos, y: scaleY * member.width * sin };
+    const axisY = { x: -scaleX * member.height * sin, y: scaleY * member.height * cos };
+    const width = Math.hypot(axisX.x, axisX.y);
+    const area = Math.abs(axisX.x * axisY.y - axisX.y * axisY.x);
+    const height = width === 0 ? 0 : area / width;
+    const angle = Math.atan2(axisX.y, axisX.x) / DEG;
     return {
       x: nextCenter.x - width / 2,
       y: nextCenter.y - height / 2,
       width,
       height,
-      rotation: normalizeAngle(member.rotation + rotationDelta),
+      rotation: normalizeAngle(to.rotation + angle),
     };
   });
+}
+
+export function groupScaleIsExact(
+  members: readonly Frame[],
+  group: Frame,
+  epsilon = 1e-6
+): boolean {
+  return members.every(member => {
+    const quarterTurns = normalizeAngle(member.rotation - group.rotation) / 90;
+    return Math.abs(quarterTurns - Math.round(quarterTurns)) * 90 < epsilon;
+  });
+}
+
+export function sharedRotation(frames: readonly Frame[], epsilon = 1e-6): number {
+  const first = frames[0];
+  if (!first) return 0;
+  const shared = frames.every(
+    frame => Math.abs(normalizeAngle(frame.rotation - first.rotation)) < epsilon
+  );
+  return shared ? first.rotation : 0;
 }
